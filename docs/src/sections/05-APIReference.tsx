@@ -68,22 +68,31 @@ const coreHooks: APIDoc[] = [
   key: 'sensorId',
 });
 
-// Insert
+// Insert single row
 sensors.push({ sensorId: 's1', temp: 25 });
 
-// Update (by key)
-sensors.update('s1', { temp: 30 });
+// Insert multiple rows
+sensors.push([
+  { sensorId: 's2', temp: 28 },
+  { sensorId: 's3', temp: 32 }
+]);
 
-// Delete
-sensors.delete('s1');
+// Update (upsert - same key overwrites)
+sensors.push({ sensorId: 's1', temp: 30 });
 
-// Bulk insert
-sensors.pushMany([...readings]);`
+// Delete by key
+sensors.remove('s1');
+
+// Delete multiple
+sensors.remove('s2', 's3');
+
+// Clear all
+sensors.clear();`
       },
     ],
     notes: [
       'Key field must be unique across all rows',
-      'Push and update are batched automatically',
+      'Push with same key will update the existing row',
     ]
   },
   {
@@ -165,21 +174,21 @@ const returnTypes = [
     description: 'Returned by useDBSPSource. Represents a mutable data collection.',
     properties: [
       { name: 'push(row)', description: 'Insert a new row (or update if key exists)' },
-      { name: 'pushMany(rows)', description: 'Insert multiple rows at once' },
-      { name: 'update(key, partial)', description: 'Update specific fields by key' },
-      { name: 'delete(key)', description: 'Remove a row by its key' },
+      { name: 'remove(...keys)', description: 'Remove rows by their keys' },
       { name: 'clear()', description: 'Remove all rows' },
-      { name: 'data', description: 'Array of all rows (read-only)' },
-      { name: 'count', description: 'Number of rows' },
+      { name: 'totalRows', description: 'Number of rows in the source' },
+      { name: 'ready', description: 'Whether the source is initialized' },
+      { name: 'stats', description: 'Performance metrics (lastUpdateMs, totalUpdates, etc.)' },
     ]
   },
   {
     name: 'DBSPView<R>',
     description: 'Returned by useDBSPView. A read-only query result.',
     properties: [
-      { name: 'data', description: 'Array of rows matching the query' },
+      { name: 'results', description: 'Array of rows matching the query' },
       { name: 'count', description: 'Number of rows in the result' },
-      { name: 'stats', description: 'Performance metrics (lastUpdateMs, etc.)' },
+      { name: 'stats', description: 'Performance metrics (lastUpdateMs, totalUpdates, etc.)' },
+      { name: 'ready', description: 'Whether the view is initialized' },
     ]
   }
 ];

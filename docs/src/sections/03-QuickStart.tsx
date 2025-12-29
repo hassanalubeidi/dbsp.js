@@ -34,9 +34,9 @@ function useDemoDBSP() {
   return { data, alerts, stats, push, clear };
 }
 
-const installCode = `npm install @dbsp/react`;
+const installCode = `npm install @dbsp/core`;
 
-const simpleExample = `import { useDBSPSource, useDBSPView } from '@dbsp/react';
+const simpleExample = `import { useDBSPSource, useDBSPView } from '@dbsp/core/react';
 
 function Dashboard() {
   // 1. Create a data source (like a database table)
@@ -66,7 +66,7 @@ function Dashboard() {
       <p>Total: {sensors.count}</p>
       <p>Alerts: {alerts.count}</p>
       <ul>
-        {alerts.data.map(a => (
+        {alerts.results.map(a => (
           <li key={a.sensorId}>{a.temperature}°C</li>
         ))}
       </ul>
@@ -186,7 +186,7 @@ export function QuickStart() {
             {/* Alerts list */}
             <div className="p-4 bg-[#0a0a0a] border border-[#ffb000]/30 max-h-48 overflow-y-auto">
               <div className="text-sm text-[#808080] mb-3">
-                alerts.data <span className="text-[#ffb000]">// WHERE temperature &gt; 35</span>
+                alerts.results <span className="text-[#ffb000]">// WHERE temperature &gt; 35</span>
               </div>
               
               {alerts.length === 0 ? (
