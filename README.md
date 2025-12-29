@@ -312,7 +312,7 @@ SELECT * FROM customers c WHERE EXISTS (SELECT 1 FROM orders o WHERE o.customerI
 ### useDBSPSource (React)
 
 ```tsx
-const source = useDBSPSource<T>({ 
+const source = useDBSPSource<T>({
   name: string,           // SQL table name
   key: string | string[], // Primary key
   maxRows?: number        // Memory limit (FIFO eviction)
@@ -406,7 +406,7 @@ When data changes, only the delta (Δ) propagates through operators:
 
 ## Documentation
 
-📚 **[View Full Documentation](https://yourusername.github.io/dbsp.js/)** - Interactive docs with examples, deep dives, and API reference.
+📚 **[View Full Documentation](https://hassanalubeidi.github.io/dbsp.js/)** - Interactive docs with examples, deep dives, and API reference.
 
 The docs site covers:
 - How Z-Sets enable incremental computation

@@ -75,7 +75,7 @@ export function Navigation() {
 
           {/* GitHub Link */}
           <a
-            href="https://github.com/hassanlubeidi/dbsp-js"
+            href="https://github.com/hassanalubeidi/dbsp.js"
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-center gap-2 px-3 py-1 text-sm font-mono text-[#00ffff] hover:bg-[#00ffff]/10 transition-colors border border-[#00ffff]/30 hover:border-[#00ffff]"

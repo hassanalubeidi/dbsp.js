@@ -56,7 +56,7 @@ export function Footer() {
             <ul className="space-y-2 text-sm">
               <li>
                 <a 
-                  href="https://github.com/user/dbsp.js" 
+                  href="https://github.com/hassanalubeidi/dbsp.js" 
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-[#00ffff] hover:text-[#50ffff] transition-colors border-none"
