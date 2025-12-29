@@ -1,0 +1,456 @@
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   TUI (Terminal UI) Theme
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+:root {
+  /* Terminal phosphor colors */
+  --term-green: #39ff14;
+  --term-green-dim: #1a8f0a;
+  --term-green-glow: rgba(57, 255, 20, 0.4);
+  --term-amber: #ffb000;
+  --term-amber-dim: #a67000;
+  --term-cyan: #00ffff;
+  --term-cyan-dim: #008b8b;
+  --term-magenta: #ff00ff;
+  --term-red: #ff3333;
+  --term-white: #e0e0e0;
+  --term-gray: #808080;
+  --term-dark: #0a0a0a;
+  --term-bg: #0d1117;
+  --term-bg-light: #161b22;
+  
+  /* Scanline effect */
+  --scanline-opacity: 0.03;
+}
+
+/* Base styles */
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
+  background: var(--term-bg);
+  color: var(--term-white);
+  line-height: 1.6;
+}
+
+/* CRT Scanline overlay */
+body::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 9999;
+  background: repeating-linear-gradient(
+    0deg,
+    rgba(0, 0, 0, var(--scanline-opacity)) 0px,
+    rgba(0, 0, 0, var(--scanline-opacity)) 1px,
+    transparent 1px,
+    transparent 2px
+  );
+}
+
+/* Phosphor glow on text */
+h1, h2, h3 {
+  text-shadow: 0 0 10px var(--term-green-glow), 0 0 20px var(--term-green-glow);
+}
+
+/* Custom scrollbar - terminal style */
+::-webkit-scrollbar {
+  width: 12px;
+  height: 12px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--term-dark);
+  border-left: 1px solid var(--term-green-dim);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--term-green-dim);
+  border: 2px solid var(--term-dark);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--term-green);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   TUI Components
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* Terminal box with ASCII borders */
+.tui-box {
+  position: relative;
+  background: var(--term-bg);
+  border: 1px solid var(--term-green-dim);
+  padding: 1rem;
+}
+
+.tui-box::before {
+  content: '┌' attr(data-title) '─────────────────────────────────────────────┐';
+  position: absolute;
+  top: -0.75rem;
+  left: 0.5rem;
+  background: var(--term-bg);
+  padding: 0 0.5rem;
+  color: var(--term-green);
+  font-size: 0.75rem;
+}
+
+/* Blinking cursor */
+.cursor {
+  display: inline-block;
+  width: 0.6em;
+  height: 1.2em;
+  background: var(--term-green);
+  animation: blink 1s step-end infinite;
+  vertical-align: text-bottom;
+  margin-left: 2px;
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+/* Terminal prompt */
+.prompt::before {
+  content: '❯ ';
+  color: var(--term-green);
+}
+
+/* Success/error/warning colors */
+.term-success { color: var(--term-green); }
+.term-error { color: var(--term-red); }
+.term-warning { color: var(--term-amber); }
+.term-info { color: var(--term-cyan); }
+
+/* Glow effects */
+.glow-green {
+  box-shadow: 0 0 10px var(--term-green-glow), 
+              0 0 20px var(--term-green-glow),
+              inset 0 0 10px rgba(57, 255, 20, 0.1);
+  border-color: var(--term-green) !important;
+}
+
+.glow-amber {
+  box-shadow: 0 0 10px rgba(255, 176, 0, 0.4),
+              0 0 20px rgba(255, 176, 0, 0.2);
+  border-color: var(--term-amber) !important;
+}
+
+.glow-cyan {
+  box-shadow: 0 0 10px rgba(0, 255, 255, 0.4),
+              0 0 20px rgba(0, 255, 255, 0.2);
+  border-color: var(--term-cyan) !important;
+}
+
+.text-glow-green {
+  text-shadow: 0 0 10px var(--term-green-glow), 0 0 20px var(--term-green-glow);
+}
+
+.text-glow-amber {
+  text-shadow: 0 0 10px rgba(255, 176, 0, 0.6), 0 0 20px rgba(255, 176, 0, 0.3);
+}
+
+.text-glow-cyan {
+  text-shadow: 0 0 10px rgba(0, 255, 255, 0.6), 0 0 20px rgba(0, 255, 255, 0.3);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   Code Blocks - Terminal Style
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.shiki, pre, code {
+  font-family: 'JetBrains Mono', monospace !important;
+}
+
+.shiki {
+  padding: 1rem;
+  border: 1px solid var(--term-green-dim);
+  background: var(--term-dark) !important;
+  overflow-x: auto;
+  font-size: 0.875rem;
+  line-height: 1.7;
+  position: relative;
+}
+
+.shiki::before {
+  content: '$ ';
+  color: var(--term-green);
+  opacity: 0.5;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   ASCII Art Decorations
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* Horizontal rule */
+hr {
+  border: none;
+  height: 1px;
+  background: linear-gradient(90deg, 
+    transparent, 
+    var(--term-green-dim) 20%, 
+    var(--term-green) 50%, 
+    var(--term-green-dim) 80%, 
+    transparent
+  );
+  margin: 2rem 0;
+}
+
+/* Links */
+a {
+  color: var(--term-cyan);
+  text-decoration: none;
+  border-bottom: 1px dashed var(--term-cyan-dim);
+  transition: all 0.2s;
+}
+
+a:hover {
+  color: var(--term-cyan);
+  text-shadow: 0 0 10px rgba(0, 255, 255, 0.6);
+  border-bottom-style: solid;
+}
+
+/* Buttons - terminal style */
+button, .btn {
+  font-family: 'JetBrains Mono', monospace;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   Animations
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* Delta row animation */
+@keyframes deltaAppear {
+  0% {
+    opacity: 0;
+    transform: translateX(-10px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.delta-row {
+  animation: deltaAppear 0.3s ease-out;
+}
+
+/* Matrix rain effect (subtle background) */
+@keyframes matrixFall {
+  0% { transform: translateY(-100%); opacity: 0; }
+  10% { opacity: 1; }
+  90% { opacity: 1; }
+  100% { transform: translateY(100vh); opacity: 0; }
+}
+
+/* Typing effect */
+@keyframes typing {
+  from { width: 0; }
+  to { width: 100%; }
+}
+
+.typing-effect {
+  overflow: hidden;
+  white-space: nowrap;
+  animation: typing 2s steps(40) forwards;
+}
+
+/* Circuit diagram lines */
+.circuit-line {
+  stroke-dasharray: 5;
+  animation: dashFlow 1s linear infinite;
+}
+
+@keyframes dashFlow {
+  to {
+    stroke-dashoffset: -10;
+  }
+}
+
+/* Section fade in */
+section {
+  opacity: 0;
+  transform: translateY(10px);
+  animation: sectionFadeIn 0.4s ease-out forwards;
+}
+
+@keyframes sectionFadeIn {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Stagger children */
+.stagger-children > * {
+  opacity: 0;
+  animation: sectionFadeIn 0.3s ease-out forwards;
+}
+
+.stagger-children > *:nth-child(1) { animation-delay: 0.05s; }
+.stagger-children > *:nth-child(2) { animation-delay: 0.1s; }
+.stagger-children > *:nth-child(3) { animation-delay: 0.15s; }
+.stagger-children > *:nth-child(4) { animation-delay: 0.2s; }
+.stagger-children > *:nth-child(5) { animation-delay: 0.25s; }
+
+/* Live indicator - terminal style */
+.live-dot {
+  width: 8px;
+  height: 8px;
+  background: var(--term-green);
+  border-radius: 0;
+  animation: livePulse 1s step-end infinite;
+  box-shadow: 0 0 10px var(--term-green-glow);
+}
+
+@keyframes livePulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   Utility Classes
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* Terminal colors as utilities */
+.text-term-green { color: var(--term-green); }
+.text-term-amber { color: var(--term-amber); }
+.text-term-cyan { color: var(--term-cyan); }
+.text-term-magenta { color: var(--term-magenta); }
+.text-term-red { color: var(--term-red); }
+.text-term-gray { color: var(--term-gray); }
+
+.bg-term-dark { background: var(--term-dark); }
+.bg-term-bg { background: var(--term-bg); }
+.bg-term-light { background: var(--term-bg-light); }
+
+.border-term-green { border-color: var(--term-green); }
+.border-term-green-dim { border-color: var(--term-green-dim); }
+.border-term-amber { border-color: var(--term-amber); }
+.border-term-cyan { border-color: var(--term-cyan); }
+
+/* ASCII box characters for borders */
+.ascii-border {
+  border: 1px solid var(--term-green-dim);
+  position: relative;
+}
+
+.ascii-border::before,
+.ascii-border::after {
+  position: absolute;
+  color: var(--term-green);
+  font-size: 1rem;
+  line-height: 1;
+}
+
+/* Pixel-perfect borders */
+.pixel-border {
+  border: 2px solid;
+  border-image: linear-gradient(
+    var(--term-green-dim),
+    var(--term-green-dim)
+  ) 1;
+}
+
+/* Status bar style */
+.status-bar {
+  background: var(--term-green-dim);
+  color: var(--term-dark);
+  padding: 0.25rem 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+/* Inverted text (highlight) */
+.inverted {
+  background: var(--term-green);
+  color: var(--term-dark);
+  padding: 0 0.25rem;
+}
+
+/* Selection color */
+::selection {
+  background: var(--term-green);
+  color: var(--term-dark);
+}
+
+/* Focus styles */
+*:focus {
+  outline: 2px solid var(--term-green);
+  outline-offset: 2px;
+}
+
+/* Table styles */
+table {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+th, td {
+  border: 1px solid var(--term-green-dim);
+  padding: 0.5rem;
+  text-align: left;
+}
+
+th {
+  background: var(--term-green-dim);
+  color: var(--term-dark);
+  font-weight: 600;
+}
+
+tr:hover {
+  background: rgba(57, 255, 20, 0.05);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   API Reference - Clean, Legible Styles
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+#api-reference {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif !important;
+}
+
+#api-reference h2,
+#api-reference h3,
+#api-reference h4,
+#api-reference h5 {
+  text-shadow: none !important;
+  text-transform: none !important;
+}
+
+#api-reference p,
+#api-reference span,
+#api-reference li {
+  text-transform: none !important;
+}
+
+#api-reference button {
+  text-transform: none !important;
+}
+
+#api-reference table th,
+#api-reference table td {
+  border-color: #334155;
+  background: transparent;
+}
+
+#api-reference table th {
+  background: #1e293b;
+  color: #cbd5e1;
+}

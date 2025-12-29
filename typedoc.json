@@ -1,0 +1,45 @@
+{
+  "$schema": "https://typedoc.org/schema.json",
+  "entryPoints": [
+    "../../src/dbsp/index.ts",
+    "../../src/dbsp/react/index.ts",
+    "../../src/dbsp/sql/index.ts",
+    "../../src/dbsp/joins/index.ts"
+  ],
+  "out": "api-docs",
+  "name": "DBSP - Database Stream Processor",
+  "readme": "./README.md",
+  "includeVersion": true,
+  "excludePrivate": true,
+  "excludeProtected": false,
+  "excludeInternal": true,
+  "excludeExternals": true,
+  "categoryOrder": [
+    "React API",
+    "Core Primitives",
+    "SQL Compiler",
+    "Joins",
+    "Utilities"
+  ],
+  "navigation": {
+    "includeCategories": true,
+    "includeGroups": true
+  },
+  "visibilityFilters": {
+    "protected": false,
+    "private": false,
+    "inherited": true,
+    "@internal": false
+  },
+  "plugin": [
+    "typedoc-plugin-markdown"
+  ],
+  "githubPages": false,
+  "sort": [
+    "source-order",
+    "alphabetical"
+  ],
+  "tsconfig": "./tsconfig.build.json"
+}
+
+

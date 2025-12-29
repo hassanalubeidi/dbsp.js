@@ -1,0 +1,15 @@
+# Dev config
+tsconfig.json
+tsconfig.build.json
+typedoc.json
+vitest.config.ts
+.gitignore
+
+# Build artifacts
+*.tgz
+.tsbuildinfo
+
+# Tests
+src/__tests__/
+**/*.test.ts
+**/*.test.tsx
