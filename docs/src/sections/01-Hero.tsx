@@ -29,8 +29,8 @@ export function Hero() {
 
   // Main animation orchestrator
   useEffect(() => {
-    let timeout: NodeJS.Timeout;
-    let interval: NodeJS.Timeout;
+    let timeout: ReturnType<typeof setTimeout>;
+    let interval: ReturnType<typeof setInterval>;
     
     if (animationPhase === 'typing') {
       const fullText = baseText + 'milliseconds';
