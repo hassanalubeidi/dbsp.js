@@ -1,0 +1,1750 @@
+<!DOCTYPE html>
+<!-- saved from url=(0064)file:///C:/Users/hassa/Downloads/incremental-data-explainer.html -->
+<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>The Incremental Revolution: A Developer's Guide to Fast DataFrame Processing</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com/">
+  <link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin="">
+  <link href="./The Incremental Revolution_ A Developer&#39;s Guide to Fast DataFrame Processing_files/css2" rel="stylesheet">
+  <style>
+    :root {
+      --bg-primary: #0d1117;
+      --bg-secondary: #161b22;
+      --bg-tertiary: #21262d;
+      --text-primary: #e6edf3;
+      --text-secondary: #8b949e;
+      --text-muted: #6e7681;
+      --accent-blue: #58a6ff;
+      --accent-green: #3fb950;
+      --accent-orange: #d29922;
+      --accent-red: #f85149;
+      --accent-purple: #a371f7;
+      --accent-cyan: #39c5cf;
+      --border: #30363d;
+      --code-bg: #0d1117;
+      --highlight: rgba(88, 166, 255, 0.15);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: 'Source Serif 4', Georgia, serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      line-height: 1.7;
+      font-size: 18px;
+    }
+
+    /* Header */
+    header {
+      position: relative;
+      padding: 120px 40px 80px;
+      overflow: hidden;
+      border-bottom: 1px solid var(--border);
+    }
+
+    header::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: 
+        radial-gradient(ellipse 80% 50% at 50% -20%, rgba(88, 166, 255, 0.15), transparent),
+        radial-gradient(ellipse 60% 40% at 80% 60%, rgba(163, 113, 247, 0.1), transparent);
+      pointer-events: none;
+    }
+
+    .header-content {
+      max-width: 900px;
+      margin: 0 auto;
+      position: relative;
+      z-index: 1;
+    }
+
+    .paper-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border);
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      color: var(--accent-cyan);
+      margin-bottom: 24px;
+      letter-spacing: 0.5px;
+    }
+
+    .paper-badge::before {
+      content: '';
+      width: 8px;
+      height: 8px;
+      background: var(--accent-green);
+      border-radius: 50%;
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.5; transform: scale(1.2); }
+    }
+
+    h1 {
+      font-family: 'Fraunces', serif;
+      font-size: clamp(2.5rem, 5vw, 4rem);
+      font-weight: 700;
+      line-height: 1.1;
+      margin-bottom: 24px;
+      background: linear-gradient(135deg, var(--text-primary) 0%, var(--accent-blue) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .subtitle {
+      font-size: 1.25rem;
+      color: var(--text-secondary);
+      max-width: 600px;
+      margin-bottom: 32px;
+    }
+
+    .meta-info {
+      display: flex;
+      gap: 24px;
+      flex-wrap: wrap;
+      font-size: 14px;
+      color: var(--text-muted);
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .meta-info span {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* Navigation */
+    nav {
+      position: sticky;
+      top: 0;
+      background: rgba(13, 17, 23, 0.85);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+      z-index: 100;
+      padding: 0 40px;
+    }
+
+    .nav-inner {
+      max-width: 900px;
+      margin: 0 auto;
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      padding: 12px 0;
+      scrollbar-width: none;
+    }
+
+    .nav-inner::-webkit-scrollbar {
+      display: none;
+    }
+
+    nav a {
+      color: var(--text-secondary);
+      text-decoration: none;
+      font-size: 14px;
+      font-family: 'JetBrains Mono', monospace;
+      padding: 8px 16px;
+      border-radius: 6px;
+      white-space: nowrap;
+      transition: all 0.2s;
+    }
+
+    nav a:hover {
+      color: var(--text-primary);
+      background: var(--bg-tertiary);
+    }
+
+    nav a.active {
+      color: var(--accent-blue);
+      background: var(--highlight);
+    }
+
+    /* Main Content */
+    main {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 60px 40px;
+    }
+
+    section {
+      margin-bottom: 80px;
+      scroll-margin-top: 80px;
+    }
+
+    h2 {
+      font-family: 'Fraunces', serif;
+      font-size: 2rem;
+      font-weight: 500;
+      margin-bottom: 24px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    h2 .section-number {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 14px;
+      color: var(--accent-blue);
+      background: var(--highlight);
+      padding: 4px 10px;
+      border-radius: 4px;
+    }
+
+    h3 {
+      font-family: 'Fraunces', serif;
+      font-size: 1.4rem;
+      font-weight: 500;
+      margin: 40px 0 16px;
+      color: var(--text-primary);
+    }
+
+    p {
+      margin-bottom: 20px;
+      color: var(--text-secondary);
+    }
+
+    strong {
+      color: var(--text-primary);
+      font-weight: 600;
+    }
+
+    /* Key Insight Boxes */
+    .key-insight {
+      background: linear-gradient(135deg, rgba(88, 166, 255, 0.1) 0%, rgba(163, 113, 247, 0.05) 100%);
+      border: 1px solid rgba(88, 166, 255, 0.3);
+      border-radius: 12px;
+      padding: 24px;
+      margin: 32px 0;
+      position: relative;
+    }
+
+    .key-insight::before {
+      content: '💡';
+      position: absolute;
+      top: -12px;
+      left: 20px;
+      background: var(--bg-primary);
+      padding: 0 8px;
+      font-size: 20px;
+    }
+
+    .key-insight h4 {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--accent-blue);
+      margin-bottom: 12px;
+    }
+
+    .key-insight p {
+      color: var(--text-primary);
+      margin-bottom: 0;
+      font-size: 17px;
+    }
+
+    /* Code Blocks */
+    pre {
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 20px;
+      overflow-x: auto;
+      margin: 24px 0;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    code {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.9em;
+    }
+
+    :not(pre) > code {
+      background: var(--bg-tertiary);
+      padding: 2px 6px;
+      border-radius: 4px;
+      color: var(--accent-cyan);
+    }
+
+    .code-comment { color: var(--text-muted); }
+    .code-keyword { color: var(--accent-purple); }
+    .code-string { color: var(--accent-green); }
+    .code-number { color: var(--accent-orange); }
+    .code-function { color: var(--accent-blue); }
+    .code-type { color: var(--accent-cyan); }
+
+    /* Diagrams */
+    .diagram-container {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 32px;
+      margin: 32px 0;
+      overflow-x: auto;
+    }
+
+    .diagram-title {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--text-muted);
+      margin-bottom: 24px;
+    }
+
+    /* Comparison Diagrams */
+    .comparison-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      margin: 32px 0;
+    }
+
+    @media (max-width: 700px) {
+      .comparison-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .comparison-panel {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 24px;
+      position: relative;
+    }
+
+    .comparison-panel.bad {
+      border-color: rgba(248, 81, 73, 0.3);
+    }
+
+    .comparison-panel.good {
+      border-color: rgba(63, 185, 80, 0.3);
+    }
+
+    .comparison-panel h4 {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .comparison-panel.bad h4 { color: var(--accent-red); }
+    .comparison-panel.good h4 { color: var(--accent-green); }
+
+    .badge {
+      font-size: 11px;
+      padding: 2px 8px;
+      border-radius: 10px;
+      font-weight: 500;
+    }
+
+    .badge.slow {
+      background: rgba(248, 81, 73, 0.2);
+      color: var(--accent-red);
+    }
+
+    .badge.fast {
+      background: rgba(63, 185, 80, 0.2);
+      color: var(--accent-green);
+    }
+
+    /* Interactive Memory Layout */
+    .memory-layout {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+    }
+
+    .memory-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .memory-label {
+      width: 80px;
+      color: var(--text-muted);
+      text-align: right;
+    }
+
+    .memory-cells {
+      display: flex;
+      gap: 2px;
+    }
+
+    .memory-cell {
+      width: 60px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 4px;
+      font-size: 11px;
+      transition: all 0.3s;
+    }
+
+    .memory-cell.name { background: rgba(163, 113, 247, 0.3); color: var(--accent-purple); }
+    .memory-cell.age { background: rgba(88, 166, 255, 0.3); color: var(--accent-blue); }
+    .memory-cell.salary { background: rgba(63, 185, 80, 0.3); color: var(--accent-green); }
+    .memory-cell.scattered { background: var(--bg-tertiary); color: var(--text-muted); }
+
+    .memory-cell:hover {
+      transform: scale(1.1);
+      z-index: 1;
+    }
+
+    /* Performance Chart */
+    .perf-chart {
+      width: 100%;
+      height: 200px;
+      position: relative;
+    }
+
+    .perf-bar-container {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-around;
+      height: 160px;
+      padding: 0 20px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .perf-bar-wrapper {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .perf-bar {
+      width: 60px;
+      border-radius: 4px 4px 0 0;
+      position: relative;
+      transition: height 1s ease-out;
+      cursor: pointer;
+    }
+
+    .perf-bar:hover {
+      filter: brightness(1.2);
+    }
+
+    .perf-bar .value {
+      position: absolute;
+      top: -24px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      white-space: nowrap;
+    }
+
+    .perf-bar.row-full { background: linear-gradient(180deg, var(--accent-red), #8b2020); }
+    .perf-bar.typed-full { background: linear-gradient(180deg, var(--accent-orange), #8b5a00); }
+    .perf-bar.row-incr { background: linear-gradient(180deg, var(--accent-purple), #5a2d82); }
+    .perf-bar.typed-incr { background: linear-gradient(180deg, var(--accent-green), #1a5f28); }
+
+    .perf-labels {
+      display: flex;
+      justify-content: space-around;
+      padding: 12px 20px 0;
+    }
+
+    .perf-label {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      color: var(--text-muted);
+      text-align: center;
+      max-width: 80px;
+    }
+
+    /* ZSet Visualization */
+    .zset-viz {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .zset-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px;
+    }
+
+    .zset-table th {
+      text-align: left;
+      padding: 8px 12px;
+      border-bottom: 2px solid var(--border);
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+
+    .zset-table td {
+      padding: 8px 12px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .zset-table tr:hover td {
+      background: var(--bg-tertiary);
+    }
+
+    .weight {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      font-weight: 600;
+    }
+
+    .weight.positive {
+      background: rgba(63, 185, 80, 0.2);
+      color: var(--accent-green);
+    }
+
+    .weight.negative {
+      background: rgba(248, 81, 73, 0.2);
+      color: var(--accent-red);
+    }
+
+    .weight.zero {
+      background: var(--bg-tertiary);
+      color: var(--text-muted);
+    }
+
+    /* Operator Flow Diagram */
+    .operator-flow {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 20px 0;
+      overflow-x: auto;
+    }
+
+    .operator-box {
+      flex-shrink: 0;
+      padding: 16px 20px;
+      border-radius: 8px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px;
+      text-align: center;
+      border: 1px solid var(--border);
+      background: var(--bg-tertiary);
+      position: relative;
+    }
+
+    .operator-box.source {
+      border-color: var(--accent-blue);
+      background: rgba(88, 166, 255, 0.1);
+    }
+
+    .operator-box.filter {
+      border-color: var(--accent-purple);
+      background: rgba(163, 113, 247, 0.1);
+    }
+
+    .operator-box.groupby {
+      border-color: var(--accent-green);
+      background: rgba(63, 185, 80, 0.1);
+    }
+
+    .operator-box.result {
+      border-color: var(--accent-orange);
+      background: rgba(210, 153, 34, 0.1);
+    }
+
+    .operator-box small {
+      display: block;
+      color: var(--text-muted);
+      font-size: 10px;
+      margin-top: 4px;
+    }
+
+    .flow-arrow {
+      flex-shrink: 0;
+      color: var(--text-muted);
+      font-size: 20px;
+    }
+
+    /* State Accumulator Animation */
+    .accumulator-demo {
+      background: var(--bg-tertiary);
+      border-radius: 8px;
+      padding: 20px;
+      margin: 24px 0;
+    }
+
+    .accumulator-state {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+
+    .state-box {
+      font-family: 'JetBrains Mono', monospace;
+      padding: 12px 20px;
+      border-radius: 6px;
+      background: var(--bg-primary);
+      border: 1px solid var(--border);
+    }
+
+    .state-box .label {
+      font-size: 10px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .state-box .value {
+      font-size: 24px;
+      font-weight: 500;
+      color: var(--accent-green);
+    }
+
+    .accumulator-log {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      max-height: 150px;
+      overflow-y: auto;
+      background: var(--bg-primary);
+      border-radius: 6px;
+      padding: 12px;
+    }
+
+    .log-entry {
+      padding: 4px 0;
+      border-bottom: 1px solid var(--border);
+      opacity: 0;
+      animation: fadeIn 0.3s forwards;
+    }
+
+    .log-entry:last-child {
+      border-bottom: none;
+    }
+
+    @keyframes fadeIn {
+      to { opacity: 1; }
+    }
+
+    .log-entry .op { color: var(--accent-purple); }
+    .log-entry .val { color: var(--accent-orange); }
+    .log-entry .result { color: var(--accent-green); }
+
+    /* Interactive Demo */
+    .interactive-demo {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+      margin: 32px 0;
+    }
+
+    .demo-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 20px;
+      background: var(--bg-tertiary);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .demo-title {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px;
+      color: var(--text-primary);
+    }
+
+    .demo-controls {
+      display: flex;
+      gap: 8px;
+    }
+
+    .demo-btn {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      padding: 6px 12px;
+      border-radius: 4px;
+      border: 1px solid var(--border);
+      background: var(--bg-primary);
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .demo-btn:hover {
+      background: var(--bg-tertiary);
+      color: var(--text-primary);
+      border-color: var(--accent-blue);
+    }
+
+    .demo-btn.primary {
+      background: var(--accent-blue);
+      color: var(--bg-primary);
+      border-color: var(--accent-blue);
+    }
+
+    .demo-btn.primary:hover {
+      background: #79b8ff;
+    }
+
+    .demo-body {
+      padding: 20px;
+    }
+
+    .demo-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+
+    @media (max-width: 600px) {
+      .demo-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .demo-panel h5 {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--text-muted);
+      margin-bottom: 12px;
+    }
+
+    .demo-stats {
+      display: flex;
+      gap: 16px;
+      padding: 16px;
+      background: var(--bg-primary);
+      border-radius: 8px;
+      margin-top: 16px;
+    }
+
+    .stat {
+      text-align: center;
+    }
+
+    .stat-value {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 24px;
+      font-weight: 500;
+    }
+
+    .stat-value.highlight { color: var(--accent-green); }
+
+    .stat-label {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    /* Complexity Table */
+    .complexity-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px;
+      margin: 24px 0;
+    }
+
+    .complexity-table th,
+    .complexity-table td {
+      padding: 12px 16px;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .complexity-table th {
+      background: var(--bg-tertiary);
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+
+    .complexity-table tr:hover td {
+      background: var(--bg-secondary);
+    }
+
+    .complexity-table .good { color: var(--accent-green); }
+    .complexity-table .bad { color: var(--accent-red); }
+
+    /* Timeline Animation */
+    .timeline {
+      position: relative;
+      padding-left: 40px;
+      margin: 32px 0;
+    }
+
+    .timeline::before {
+      content: '';
+      position: absolute;
+      left: 15px;
+      top: 0;
+      bottom: 0;
+      width: 2px;
+      background: var(--border);
+    }
+
+    .timeline-item {
+      position: relative;
+      padding: 16px 0;
+      opacity: 0;
+      transform: translateX(-20px);
+      animation: slideIn 0.5s forwards;
+    }
+
+    .timeline-item:nth-child(1) { animation-delay: 0.1s; }
+    .timeline-item:nth-child(2) { animation-delay: 0.2s; }
+    .timeline-item:nth-child(3) { animation-delay: 0.3s; }
+    .timeline-item:nth-child(4) { animation-delay: 0.4s; }
+
+    @keyframes slideIn {
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+
+    .timeline-item::before {
+      content: '';
+      position: absolute;
+      left: -33px;
+      top: 20px;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: var(--accent-blue);
+      border: 3px solid var(--bg-primary);
+    }
+
+    .timeline-item h4 {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px;
+      color: var(--accent-blue);
+      margin-bottom: 8px;
+    }
+
+    .timeline-item p {
+      font-size: 15px;
+      margin-bottom: 0;
+    }
+
+    /* Callout */
+    .callout {
+      display: flex;
+      gap: 16px;
+      padding: 20px;
+      background: var(--bg-secondary);
+      border-left: 3px solid var(--accent-blue);
+      border-radius: 0 8px 8px 0;
+      margin: 24px 0;
+    }
+
+    .callout-icon {
+      font-size: 24px;
+      flex-shrink: 0;
+    }
+
+    .callout-content {
+      flex: 1;
+    }
+
+    .callout-content p {
+      margin-bottom: 0;
+    }
+
+    /* Footer */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 40px;
+      text-align: center;
+    }
+
+    footer p {
+      font-size: 14px;
+      color: var(--text-muted);
+    }
+
+    footer a {
+      color: var(--accent-blue);
+      text-decoration: none;
+    }
+
+    footer a:hover {
+      text-decoration: underline;
+    }
+
+    /* Scroll animations */
+    .reveal {
+      opacity: 0;
+      transform: translateY(30px);
+      transition: opacity 0.6s, transform 0.6s;
+    }
+
+    .reveal.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-content">
+      <div class="paper-badge">Living Research Paper • January 2026</div>
+      <h1>The Incremental Revolution</h1>
+      <p class="subtitle">
+        How columnar storage and weighted deltas achieve 160× speedups in JavaScript data processing—explained for developers who've never heard of DBSP.
+      </p>
+      <div class="meta-info">
+        <span>📊 Based on PandaJS Architecture</span>
+        <span>⏱️ ~15 min read</span>
+        <span>🎯 For JS/TS developers</span>
+      </div>
+    </div>
+  </header>
+
+  <nav>
+    <div class="nav-inner">
+      <a href="file:///C:/Users/hassa/Downloads/incremental-data-explainer.html#problem" class="active">The Problem</a>
+      <a href="file:///C:/Users/hassa/Downloads/incremental-data-explainer.html#columnar">Columnar Storage</a>
+      <a href="file:///C:/Users/hassa/Downloads/incremental-data-explainer.html#weights">Weighted Rows</a>
+      <a href="file:///C:/Users/hassa/Downloads/incremental-data-explainer.html#operators">Operators</a>
+      <a href="file:///C:/Users/hassa/Downloads/incremental-data-explainer.html#state">State Management</a>
+      <a href="file:///C:/Users/hassa/Downloads/incremental-data-explainer.html#performance">Performance</a>
+    </div>
+  </nav>
+
+  <main>
+    <!-- Section 1: The Problem -->
+    <section id="problem" class="reveal visible">
+      <h2><span class="section-number">01</span> The Problem: Why DataFrames Are Slow</h2>
+      
+      <p>
+        Imagine you have a dashboard showing sales totals by region. You have <strong>1 million rows</strong> of data. 
+        Every time a new sale comes in, you need to update the totals.
+      </p>
+
+      <p>
+        With traditional DataFrame libraries (like Pandas in Python or typical JS implementations), 
+        adding that one new row means <strong>re-reading and re-processing all 1 million rows</strong>.
+      </p>
+
+      <div class="comparison-grid">
+        <div class="comparison-panel bad">
+          <h4>❌ Traditional Approach <span class="badge slow">O(n)</span></h4>
+          <pre><code><span class="code-comment">// Every update recomputes EVERYTHING</span>
+data.<span class="code-function">push</span>(newSale);
+<span class="code-keyword">const</span> totals = data.<span class="code-function">reduce</span>((acc, row) =&gt; {
+  acc[row.region] = (acc[row.region] || <span class="code-number">0</span>) + row.amount;
+  <span class="code-keyword">return</span> acc;
+}, {});
+<span class="code-comment">// ↑ Scans 1,000,001 rows every time!</span></code></pre>
+        </div>
+        <div class="comparison-panel good">
+          <h4>✓ Incremental Approach <span class="badge fast">O(Δ)</span></h4>
+          <pre><code><span class="code-comment">// Only process what changed</span>
+source.<span class="code-function">insert</span>([newSale]);
+<span class="code-comment">// Internally:</span>
+<span class="code-comment">// 1. Look up "West" group → O(1)</span>
+<span class="code-comment">// 2. Add 150 to sum → O(1)</span>
+<span class="code-comment">// 3. Done!</span>
+<span class="code-comment">// ↑ Processes just 1 row</span></code></pre>
+        </div>
+      </div>
+
+      <div class="key-insight">
+        <h4>The Core Insight</h4>
+        <p>
+          Most operations (filter, map, groupBy) have a mathematical property: 
+          you can apply them to just the <em>changes</em> and combine with previous results.
+          This is called <strong>incrementalization</strong>.
+        </p>
+      </div>
+    </section>
+
+    <!-- Section 2: Columnar Storage -->
+    <section id="columnar" class="reveal">
+      <h2><span class="section-number">02</span> Columnar Storage: Memory That Makes Sense</h2>
+      
+      <p>
+        Before we talk about incremental updates, let's fix a more fundamental problem: 
+        <strong>how data is laid out in memory</strong>.
+      </p>
+
+      <h3>Row-Oriented (Traditional JavaScript)</h3>
+      <p>
+        Arrays of objects scatter related data across memory. When you want to sum all salaries, 
+        your CPU cache constantly misses because values aren't contiguous.
+      </p>
+
+      <div class="diagram-container">
+        <div class="diagram-title">Memory Layout: Row-Oriented</div>
+        <div class="memory-layout">
+          <div class="memory-row">
+            <span class="memory-label">Object 0:</span>
+            <div class="memory-cells">
+              <div class="memory-cell name">"Alice"</div>
+              <div class="memory-cell age">30</div>
+              <div class="memory-cell salary">50000</div>
+              <div class="memory-cell scattered">···</div>
+            </div>
+          </div>
+          <div class="memory-row">
+            <span class="memory-label">Object 1:</span>
+            <div class="memory-cells">
+              <div class="memory-cell name">"Bob"</div>
+              <div class="memory-cell age">25</div>
+              <div class="memory-cell salary">60000</div>
+              <div class="memory-cell scattered">···</div>
+            </div>
+          </div>
+          <div class="memory-row">
+            <span class="memory-label">Object 2:</span>
+            <div class="memory-cells">
+              <div class="memory-cell name">"Carol"</div>
+              <div class="memory-cell age">35</div>
+              <div class="memory-cell salary">55000</div>
+              <div class="memory-cell scattered">···</div>
+            </div>
+          </div>
+        </div>
+        <p style="margin-top: 16px; font-size: 13px; color: var(--text-muted);">
+          ↑ To sum salaries, CPU must jump between scattered memory locations
+        </p>
+      </div>
+
+      <h3>Column-Oriented (TypedArrays)</h3>
+      <p>
+        Store each column in its own contiguous array. Now summing salaries is just 
+        a single pass over consecutive memory addresses—CPU caches love this!
+      </p>
+
+      <div class="diagram-container">
+        <div class="diagram-title">Memory Layout: Column-Oriented</div>
+        <div class="memory-layout">
+          <div class="memory-row">
+            <span class="memory-label">names:</span>
+            <div class="memory-cells">
+              <div class="memory-cell name">"Alice"</div>
+              <div class="memory-cell name">"Bob"</div>
+              <div class="memory-cell name">"Carol"</div>
+            </div>
+          </div>
+          <div class="memory-row">
+            <span class="memory-label">ages:</span>
+            <div class="memory-cells">
+              <div class="memory-cell age">30</div>
+              <div class="memory-cell age">25</div>
+              <div class="memory-cell age">35</div>
+            </div>
+          </div>
+          <div class="memory-row">
+            <span class="memory-label">salaries:</span>
+            <div class="memory-cells">
+              <div class="memory-cell salary">50000</div>
+              <div class="memory-cell salary">60000</div>
+              <div class="memory-cell salary">55000</div>
+            </div>
+          </div>
+        </div>
+        <p style="margin-top: 16px; font-size: 13px; color: var(--text-muted);">
+          ↑ <code>Float64Array</code> — contiguous memory, CPU cache-friendly
+        </p>
+      </div>
+
+      <h3>TypedArrays: JavaScript's Secret Weapon</h3>
+      <p>
+        JavaScript's <code>Float64Array</code>, <code>Int32Array</code>, etc. provide 
+        the same performance characteristics as native C arrays:
+      </p>
+
+      <pre><code><span class="code-comment">// Regular Array: ~16 bytes per element (object wrapper)</span>
+<span class="code-keyword">const</span> regularArray = <span class="code-keyword">new</span> <span class="code-type">Array</span>(<span class="code-number">1_000_000</span>);
+
+<span class="code-comment">// TypedArray: 8 bytes per element (raw numeric value)</span>
+<span class="code-keyword">const</span> typedArray = <span class="code-keyword">new</span> <span class="code-type">Float64Array</span>(<span class="code-number">1_000_000</span>);
+
+<span class="code-comment">// Bonus: Zero-copy slicing!</span>
+<span class="code-keyword">const</span> firstHalf = typedArray.<span class="code-function">subarray</span>(<span class="code-number">0</span>, <span class="code-number">500_000</span>);
+<span class="code-comment">// ↑ O(1), no memory allocation, just a view</span></code></pre>
+
+      <div class="diagram-container">
+        <div class="diagram-title">Performance: Pipeline Execution (Filter → Map → GroupBy)</div>
+        <div class="perf-chart">
+          <div class="perf-bar-container">
+            <div class="perf-bar-wrapper">
+              <div class="perf-bar row-full" style="height: 150px;">
+                <span class="value" style="color: var(--accent-red);">305 ms</span>
+              </div>
+            </div>
+            <div class="perf-bar-wrapper">
+              <div class="perf-bar typed-full" style="height: 42px;">
+                <span class="value" style="color: var(--accent-orange);">85 ms</span>
+              </div>
+            </div>
+            <div class="perf-bar-wrapper">
+              <div class="perf-bar row-incr" style="height: 6px;">
+                <span class="value" style="color: var(--accent-purple);">12 ms</span>
+              </div>
+            </div>
+            <div class="perf-bar-wrapper">
+              <div class="perf-bar typed-incr" style="height: 2px;">
+                <span class="value" style="color: var(--accent-green);">3.8 ms</span>
+              </div>
+            </div>
+          </div>
+          <div class="perf-labels">
+            <div class="perf-label">Row-based</div>
+            <div class="perf-label">Arrow Columnar</div>
+            <div class="perf-label">JS Columnar</div>
+            <div class="perf-label">TypedArray</div>
+          </div>
+        </div>
+        <p style="margin-top: 16px; font-size: 13px; color: var(--text-muted); text-align: center;">
+          n = 100,000 rows • TypedArrays achieve <strong>79×</strong> speedup over row-based
+        </p>
+      </div>
+    </section>
+
+    <!-- Section 3: Weighted Rows -->
+    <section id="weights" class="reveal">
+      <h2><span class="section-number">03</span> Weighted Rows: The Magic of +1 and -1</h2>
+      
+      <p>
+        Here's where incremental processing gets interesting. Instead of just storing data, 
+        we attach a <strong>weight</strong> to every row:
+      </p>
+
+      <ul style="margin: 20px 0; padding-left: 24px; color: var(--text-secondary);">
+        <li><strong style="color: var(--accent-green);">+1</strong> means "this row exists" (insertion)</li>
+        <li><strong style="color: var(--accent-red);">-1</strong> means "remove this row" (deletion)</li>
+        <li><strong style="color: var(--text-muted);">0</strong> means "row cancelled out" (no effect)</li>
+      </ul>
+
+      <p>
+        This simple concept is called a <strong>Z-Set</strong> (or weighted set), and it's the 
+        foundation of a technique called DBSP (Database Stream Processing).
+      </p>
+
+      <div class="diagram-container">
+        <div class="diagram-title">Z-Set Example: Tracking Changes</div>
+        <div class="zset-viz">
+          <table class="zset-table">
+            <thead>
+              <tr>
+                <th>Weight</th>
+                <th>Region</th>
+                <th>Amount</th>
+                <th>Meaning</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><span class="weight positive">+1</span></td>
+                <td>West</td>
+                <td>100</td>
+                <td style="color: var(--text-muted);">Insert: West sale of $100</td>
+              </tr>
+              <tr>
+                <td><span class="weight positive">+1</span></td>
+                <td>East</td>
+                <td>200</td>
+                <td style="color: var(--text-muted);">Insert: East sale of $200</td>
+              </tr>
+              <tr>
+                <td><span class="weight negative">-1</span></td>
+                <td>West</td>
+                <td>100</td>
+                <td style="color: var(--text-muted);">Delete: Remove that West sale</td>
+              </tr>
+              <tr>
+                <td><span class="weight positive">+1</span></td>
+                <td>West</td>
+                <td>150</td>
+                <td style="color: var(--text-muted);">Insert: New West sale of $150</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <h3>Why Weights Are Powerful</h3>
+      <p>
+        The key insight is that <strong>most operations distribute over weights</strong>. 
+        This means instead of recomputing everything, we can:
+      </p>
+
+      <ol style="margin: 20px 0; padding-left: 24px; color: var(--text-secondary);">
+        <li>Apply the operation to just the <em>delta</em> (new changes)</li>
+        <li>Combine the result with our previous state</li>
+        <li>Weights automatically handle insertions AND deletions!</li>
+      </ol>
+
+      <pre><code><span class="code-comment">// Mathematical property: filter distributes over addition</span>
+<span class="code-function">filter</span>(A + B) = <span class="code-function">filter</span>(A) + <span class="code-function">filter</span>(B)
+
+<span class="code-comment">// So if we have:</span>
+<span class="code-comment">//   previousResult = filter(existingData)</span>
+<span class="code-comment">//   delta = newChanges (with weights +1 or -1)</span>
+<span class="code-comment">// Then:</span>
+<span class="code-comment">//   newResult = previousResult + filter(delta)</span>
+<span class="code-comment">//                                ↑ Only process the delta!</span></code></pre>
+
+      <div class="key-insight">
+        <h4>Deletions Are Just Negative Insertions</h4>
+        <p>
+          When you delete a row, you don't scan your data to remove it. 
+          Instead, you add a row with weight <strong>-1</strong>. When it flows through 
+          your aggregations, it <em>subtracts</em> from the totals automatically.
+        </p>
+      </div>
+    </section>
+
+    <!-- Section 4: Operators -->
+    <section id="operators" class="reveal">
+      <h2><span class="section-number">04</span> Operators: Building Blocks of Data Pipelines</h2>
+      
+      <p>
+        An operator is a building block that transforms data. In incremental processing, 
+        operators come in two flavors:
+      </p>
+
+      <div class="comparison-grid">
+        <div class="comparison-panel">
+          <h4 style="color: var(--accent-purple);">⚡ Stateless Operators</h4>
+          <p style="font-size: 14px; margin-bottom: 12px;">
+            Process each row independently. No memory of previous data.
+          </p>
+          <ul style="font-size: 13px; padding-left: 16px; color: var(--text-muted);">
+            <li><strong>Filter</strong> — keep/reject rows</li>
+            <li><strong>Map</strong> — transform values</li>
+            <li><strong>Select</strong> — choose columns</li>
+          </ul>
+        </div>
+        <div class="comparison-panel">
+          <h4 style="color: var(--accent-green);">🧠 Stateful Operators</h4>
+          <p style="font-size: 14px; margin-bottom: 12px;">
+            Maintain state to compute incremental results.
+          </p>
+          <ul style="font-size: 13px; padding-left: 16px; color: var(--text-muted);">
+            <li><strong>GroupBy</strong> — aggregate by key</li>
+            <li><strong>Join</strong> — combine tables</li>
+            <li><strong>Sort</strong> — order results</li>
+          </ul>
+        </div>
+      </div>
+
+      <h3>Operator Pipeline</h3>
+      <p>
+        Operations chain together to form a <strong>dataflow graph</strong>. 
+        When new data arrives, it flows through each operator in sequence:
+      </p>
+
+      <div class="diagram-container">
+        <div class="diagram-title">Data Flow: Delta Propagation</div>
+        <div class="operator-flow">
+          <div class="operator-box source">
+            Source
+            <small>New rows (+1)</small>
+          </div>
+          <span class="flow-arrow">→</span>
+          <div class="operator-box filter">
+            Filter
+            <small>age &gt; 25</small>
+          </div>
+          <span class="flow-arrow">→</span>
+          <div class="operator-box groupby">
+            GroupBy
+            <small>sum by region</small>
+          </div>
+          <span class="flow-arrow">→</span>
+          <div class="operator-box result">
+            Result
+            <small>Updated totals</small>
+          </div>
+        </div>
+        <p style="margin-top: 16px; font-size: 13px; color: var(--text-muted);">
+          Each operator processes only the delta, not the full dataset
+        </p>
+      </div>
+
+      <h3>Filter Operator (Stateless)</h3>
+      <p>
+        Filter is beautifully simple: it just sets weights to zero for rows that don't match.
+      </p>
+
+      <pre><code><span class="code-keyword">class</span> <span class="code-type">FilterOperator</span> {
+  <span class="code-function">step</span>(input: ZSet): ZSet {
+    <span class="code-comment">// Evaluate predicate for each row</span>
+    <span class="code-keyword">const</span> mask = <span class="code-keyword">this</span>.<span class="code-function">evaluatePredicate</span>(input);
+    
+    <span class="code-comment">// Keep weight if passes, zero if fails</span>
+    <span class="code-keyword">const</span> newWeights = <span class="code-keyword">new</span> <span class="code-type">Int32Array</span>(input.numRows);
+    <span class="code-keyword">for</span> (<span class="code-keyword">let</span> i = <span class="code-number">0</span>; i &lt; input.numRows; i++) {
+      newWeights[i] = mask[i] ? input.weights[i] : <span class="code-number">0</span>;
+    }
+    
+    <span class="code-keyword">return</span> input.<span class="code-function">withWeights</span>(newWeights);
+  }
+}</code></pre>
+
+      <h3>GroupBy Operator (Stateful)</h3>
+      <p>
+        GroupBy maintains running aggregates for each group. When a new row arrives, 
+        it updates just that group's state:
+      </p>
+
+      <pre><code><span class="code-keyword">class</span> <span class="code-type">GroupByOperator</span> {
+  <span class="code-keyword">private</span> groups = <span class="code-keyword">new</span> <span class="code-type">Map</span>();  <span class="code-comment">// key → accumulator state</span>
+  
+  <span class="code-function">step</span>(input: ZSet): ZSet {
+    <span class="code-keyword">for</span> (<span class="code-keyword">let</span> i = <span class="code-number">0</span>; i &lt; input.numRows; i++) {
+      <span class="code-keyword">const</span> weight = input.weights[i];
+      <span class="code-keyword">if</span> (weight === <span class="code-number">0</span>) <span class="code-keyword">continue</span>;
+      
+      <span class="code-keyword">const</span> key = <span class="code-keyword">this</span>.<span class="code-function">computeKey</span>(input, i);
+      <span class="code-keyword">const</span> group = <span class="code-keyword">this</span>.groups.<span class="code-function">get</span>(key) ?? <span class="code-keyword">this</span>.<span class="code-function">createGroup</span>();
+      
+      <span class="code-comment">// Update with weight: +1 adds, -1 subtracts!</span>
+      group.sum += input.<span class="code-function">getValue</span>(<span class="code-string">'amount'</span>, i) * weight;
+      group.count += weight;
+      
+      <span class="code-keyword">this</span>.groups.<span class="code-function">set</span>(key, group);
+    }
+    
+    <span class="code-keyword">return</span> <span class="code-keyword">this</span>.<span class="code-function">computeOutputDelta</span>();
+  }
+}</code></pre>
+
+      <div class="callout">
+        <span class="callout-icon">🔑</span>
+        <div class="callout-content">
+          <p>
+            Notice how <code>weight</code> naturally handles both insertions and deletions. 
+            When <code>weight = -1</code>, we subtract from the sum and decrement the count. 
+            No special deletion logic needed!
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 5: State Management -->
+    <section id="state" class="reveal">
+      <h2><span class="section-number">05</span> State Management: How Accumulators Work</h2>
+      
+      <p>
+        The secret sauce of incremental aggregation is the <strong>accumulator</strong>—a tiny 
+        state machine that knows how to update results incrementally.
+      </p>
+
+      <h3>Sum Accumulator</h3>
+      <p>
+        The simplest case: just add value × weight to the running total.
+      </p>
+
+      <div class="interactive-demo">
+        <div class="demo-header">
+          <span class="demo-title">▶ Interactive: Sum Accumulator</span>
+          <div class="demo-controls">
+            <button class="demo-btn" onclick="resetSumDemo()">Reset</button>
+            <button class="demo-btn primary" onclick="addToSum()">+ Insert $100</button>
+            <button class="demo-btn" onclick="removeFromSum()">− Delete $50</button>
+          </div>
+        </div>
+        <div class="demo-body">
+          <div class="accumulator-state">
+            <div class="state-box">
+              <div class="label">Current Sum</div>
+              <div class="value" id="sum-value">$0</div>
+            </div>
+          </div>
+          <div class="accumulator-log" id="sum-log">
+            <div class="log-entry">
+              <span class="op">init</span> → state = { sum: <span class="result">0</span> }
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <h3>Mean Accumulator</h3>
+      <p>
+        Mean requires tracking <em>both</em> sum and count. The weight affects both!
+      </p>
+
+      <pre><code><span class="code-keyword">class</span> <span class="code-type">MeanAccumulator</span> {
+  state = { sum: <span class="code-number">0</span>, count: <span class="code-number">0</span> };
+  
+  <span class="code-function">accumulate</span>(value: <span class="code-type">number</span>, weight: <span class="code-type">number</span>) {
+    <span class="code-keyword">this</span>.state.sum += value * weight;
+    <span class="code-keyword">this</span>.state.count += weight;  <span class="code-comment">// Count also uses weight!</span>
+  }
+  
+  <span class="code-function">finalize</span>(): <span class="code-type">number</span> | <span class="code-type">null</span> {
+    <span class="code-keyword">if</span> (<span class="code-keyword">this</span>.state.count === <span class="code-number">0</span>) <span class="code-keyword">return</span> <span class="code-keyword">null</span>;
+    <span class="code-keyword">return</span> <span class="code-keyword">this</span>.state.sum / <span class="code-keyword">this</span>.state.count;
+  }
+}</code></pre>
+
+      <h3>Min/Max: The Tricky Case</h3>
+      <p>
+        Min and Max are harder to incrementalize. Why? Because when you delete the current 
+        minimum, you need to find the <em>next</em> smallest value.
+      </p>
+
+      <div class="key-insight">
+        <h4>Min/Max State Complexity</h4>
+        <p>
+          Unlike sum (O(1) state), min/max must track <strong>all distinct values</strong> 
+          and their counts. When the current min is deleted, scan the state to find the 
+          new min. State size: O(distinct values).
+        </p>
+      </div>
+
+      <pre><code><span class="code-keyword">class</span> <span class="code-type">MinAccumulator</span> {
+  <span class="code-comment">// Must track ALL values, not just the minimum</span>
+  state = <span class="code-keyword">new</span> <span class="code-type">Map</span>&lt;<span class="code-type">number</span>, <span class="code-type">number</span>&gt;();  <span class="code-comment">// value → count</span>
+  
+  <span class="code-function">accumulate</span>(value: <span class="code-type">number</span>, weight: <span class="code-type">number</span>) {
+    <span class="code-keyword">const</span> currentCount = <span class="code-keyword">this</span>.state.<span class="code-function">get</span>(value) ?? <span class="code-number">0</span>;
+    <span class="code-keyword">const</span> newCount = currentCount + weight;
+    
+    <span class="code-keyword">if</span> (newCount &lt;= <span class="code-number">0</span>) {
+      <span class="code-keyword">this</span>.state.<span class="code-function">delete</span>(value);  <span class="code-comment">// Value no longer present</span>
+    } <span class="code-keyword">else</span> {
+      <span class="code-keyword">this</span>.state.<span class="code-function">set</span>(value, newCount);
+    }
+  }
+  
+  <span class="code-function">finalize</span>(): <span class="code-type">number</span> | <span class="code-type">null</span> {
+    <span class="code-keyword">if</span> (<span class="code-keyword">this</span>.state.size === <span class="code-number">0</span>) <span class="code-keyword">return</span> <span class="code-keyword">null</span>;
+    <span class="code-keyword">return</span> <span class="code-type">Math</span>.<span class="code-function">min</span>(...<span class="code-keyword">this</span>.state.<span class="code-function">keys</span>());
+  }
+}</code></pre>
+
+      <h3>Accumulator Complexity Summary</h3>
+      
+      <table class="complexity-table">
+        <thead>
+          <tr>
+            <th>Aggregation</th>
+            <th>State Size</th>
+            <th>Update Time</th>
+            <th>Notes</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>sum</td>
+            <td class="good">O(1)</td>
+            <td class="good">O(1)</td>
+            <td style="color: var(--text-muted);">Just a number</td>
+          </tr>
+          <tr>
+            <td>count</td>
+            <td class="good">O(1)</td>
+            <td class="good">O(1)</td>
+            <td style="color: var(--text-muted);">Just a number</td>
+          </tr>
+          <tr>
+            <td>mean</td>
+            <td class="good">O(1)</td>
+            <td class="good">O(1)</td>
+            <td style="color: var(--text-muted);">sum + count</td>
+          </tr>
+          <tr>
+            <td>min / max</td>
+            <td style="color: var(--accent-orange);">O(k)</td>
+            <td class="good">O(1)*</td>
+            <td style="color: var(--text-muted);">k = distinct values</td>
+          </tr>
+          <tr>
+            <td>distinct</td>
+            <td style="color: var(--accent-orange);">O(k)</td>
+            <td class="good">O(1)</td>
+            <td style="color: var(--text-muted);">Set of all values</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- Section 6: Performance -->
+    <section id="performance" class="reveal">
+      <h2><span class="section-number">06</span> Performance: The Numbers Don't Lie</h2>
+      
+      <p>
+        Let's see the combined effect of columnar storage + incremental processing. 
+        These benchmarks are from a study using Node.js v22 on 100,000 rows.
+      </p>
+
+      <div class="diagram-container">
+        <div class="diagram-title">Benchmark: Full Recomputation vs. Incremental (10% Delta)</div>
+        <div class="perf-chart" style="height: 220px;">
+          <div class="perf-bar-container" style="height: 180px;">
+            <div class="perf-bar-wrapper">
+              <div class="perf-bar row-full" style="height: 160px;">
+                <span class="value" style="color: var(--accent-red);">39.8 ms</span>
+              </div>
+            </div>
+            <div class="perf-bar-wrapper">
+              <div class="perf-bar typed-full" style="height: 5px;">
+                <span class="value" style="color: var(--accent-orange);">1.18 ms</span>
+              </div>
+            </div>
+            <div class="perf-bar-wrapper">
+              <div class="perf-bar row-incr" style="height: 14px;">
+                <span class="value" style="color: var(--accent-purple);">3.39 ms</span>
+              </div>
+            </div>
+            <div class="perf-bar-wrapper">
+              <div class="perf-bar typed-incr" style="height: 1px;">
+                <span class="value" style="color: var(--accent-green);">0.25 ms</span>
+              </div>
+            </div>
+          </div>
+          <div class="perf-labels">
+            <div class="perf-label">Row-based<br>Full</div>
+            <div class="perf-label">TypedArray<br>Full</div>
+            <div class="perf-label">Row-based<br>Incremental</div>
+            <div class="perf-label">TypedArray<br>Incremental</div>
+          </div>
+        </div>
+        <div class="demo-stats" style="justify-content: center; margin-top: 24px;">
+          <div class="stat">
+            <div class="stat-value">33.7×</div>
+            <div class="stat-label">Columnar speedup</div>
+          </div>
+          <div class="stat">
+            <div class="stat-value">11.7×</div>
+            <div class="stat-label">Incremental speedup</div>
+          </div>
+          <div class="stat">
+            <div class="stat-value highlight">160×</div>
+            <div class="stat-label">Combined speedup</div>
+          </div>
+        </div>
+      </div>
+
+      <h3>Scaling with Delta Size</h3>
+      <p>
+        The smaller your updates relative to total data, the bigger your win:
+      </p>
+
+      <table class="complexity-table">
+        <thead>
+          <tr>
+            <th>Delta Size</th>
+            <th>Incremental Time</th>
+            <th>Full Recompute</th>
+            <th>Speedup</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>0.1% (100 rows)</td>
+            <td>0.012 ms</td>
+            <td>1.91 ms</td>
+            <td class="good">153×</td>
+          </tr>
+          <tr>
+            <td>1% (1,000 rows)</td>
+            <td>0.022 ms</td>
+            <td>1.71 ms</td>
+            <td class="good">78×</td>
+          </tr>
+          <tr>
+            <td>10% (10,000 rows)</td>
+            <td>0.248 ms</td>
+            <td>1.84 ms</td>
+            <td style="color: var(--accent-orange);">7.4×</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3>Why It Works</h3>
+      
+      <div class="timeline">
+        <div class="timeline-item">
+          <h4>Cache-Friendly Memory Access</h4>
+          <p>
+            TypedArrays store data contiguously. When summing a column, the CPU prefetcher 
+            loads upcoming values automatically. Row-based access jumps around memory randomly.
+          </p>
+        </div>
+        <div class="timeline-item">
+          <h4>No Boxing Overhead</h4>
+          <p>
+            JavaScript numbers are normally wrapped in objects (~16 bytes each). 
+            TypedArrays store raw 8-byte values. For 1M numbers: 8 MB vs 16+ MB.
+          </p>
+        </div>
+        <div class="timeline-item">
+          <h4>JIT Optimization</h4>
+          <p>
+            V8 generates highly optimized machine code for TypedArray loops. 
+            Benchmarks show 4.9× speedup after JIT warmup (vs 1.4× for row-based).
+          </p>
+        </div>
+        <div class="timeline-item">
+          <h4>Work Proportional to Change</h4>
+          <p>
+            Incremental processing does O(Δ) work regardless of total data size. 
+            1 update to 1 million rows = same cost as 1 update to 100 rows.
+          </p>
+        </div>
+      </div>
+
+      <div class="key-insight">
+        <h4>When to Use This</h4>
+        <p>
+          This approach shines for <strong>dashboards</strong>, <strong>real-time analytics</strong>, 
+          and <strong>streaming data</strong>—anywhere you have large datasets with frequent small updates. 
+          The benefits are multiplicative: columnar × incremental = massive wins.
+        </p>
+      </div>
+
+      <h3>Quick Reference: Implementation Recommendations</h3>
+      
+      <ol style="margin: 20px 0; padding-left: 24px; color: var(--text-secondary);">
+        <li style="margin-bottom: 12px;">
+          <strong>For numeric-heavy workloads:</strong> Use <code>Float64Array</code> / <code>Int32Array</code>. 
+          30-80× faster than arrays of objects.
+        </li>
+        <li style="margin-bottom: 12px;">
+          <strong>For streaming updates:</strong> Implement weighted Z-Sets. Even 10% deltas give 7× speedup.
+        </li>
+        <li style="margin-bottom: 12px;">
+          <strong>For cross-platform data:</strong> Apache Arrow gives ~3.6× speedup and zero-copy interop 
+          with Python/Spark.
+        </li>
+        <li style="margin-bottom: 12px;">
+          <strong>For string columns:</strong> Dictionary-encode when &lt;50% unique values. 
+          Compare integers instead of strings.
+        </li>
+      </ol>
+    </section>
+  </main>
+
+  <footer>
+    <p>
+      Based on the PandaJS architecture and empirical research by Hassan Al-Ubeidi (2026).<br>
+      Core theory: <a href="https://www.vldb.org/pvldb/vol16/p1601-budiu.pdf" target="_blank">DBSP: Automatic Incremental View Maintenance</a> (Budiu et al., 2023)
+    </p>
+  </footer>
+
+  <script>
+    // Navigation highlighting
+    const sections = document.querySelectorAll('section');
+    const navLinks = document.querySelectorAll('nav a');
+
+    window.addEventListener('scroll', () => {
+      let current = '';
+      sections.forEach(section => {
+        const sectionTop = section.offsetTop;
+        if (scrollY >= sectionTop - 100) {
+          current = section.getAttribute('id');
+        }
+      });
+
+      navLinks.forEach(link => {
+        link.classList.remove('active');
+        if (link.getAttribute('href') === `#${current}`) {
+          link.classList.add('active');
+        }
+      });
+    });
+
+    // Reveal on scroll
+    const reveals = document.querySelectorAll('.reveal');
+    const revealObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+        }
+      });
+    }, { threshold: 0.1 });
+
+    reveals.forEach(el => revealObserver.observe(el));
+
+    // Sum accumulator demo
+    let sumState = 0;
+    const sumValue = document.getElementById('sum-value');
+    const sumLog = document.getElementById('sum-log');
+
+    function addToSum() {
+      const value = 100;
+      const weight = 1;
+      sumState += value * weight;
+      sumValue.textContent = `$${sumState}`;
+      addLogEntry('accumulate', `value=100, weight=+1`, sumState);
+    }
+
+    function removeFromSum() {
+      const value = 50;
+      const weight = -1;
+      sumState += value * weight;
+      sumValue.textContent = `$${sumState}`;
+      addLogEntry('accumulate', `value=50, weight=-1`, sumState);
+    }
+
+    function resetSumDemo() {
+      sumState = 0;
+      sumValue.textContent = '$0';
+      sumLog.innerHTML = `<div class="log-entry">
+        <span class="op">init</span> → state = { sum: <span class="result">0</span> }
+      </div>`;
+    }
+
+    function addLogEntry(op, params, result) {
+      const entry = document.createElement('div');
+      entry.className = 'log-entry';
+      entry.innerHTML = `<span class="op">${op}</span>(<span class="val">${params}</span>) → sum: <span class="result">${result}</span>`;
+      sumLog.appendChild(entry);
+      sumLog.scrollTop = sumLog.scrollHeight;
+    }
+
+    // Animate performance bars on scroll
+    const perfBars = document.querySelectorAll('.perf-bar');
+    const perfObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.style.transition = 'height 1s ease-out';
+        }
+      });
+    }, { threshold: 0.5 });
+
+    perfBars.forEach(bar => perfObserver.observe(bar));
+  </script>
+
+
+</body></html>
