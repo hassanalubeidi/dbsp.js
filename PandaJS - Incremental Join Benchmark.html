@@ -1,0 +1,1071 @@
+<!DOCTYPE html>
+<!-- saved from url=(0039)http://localhost:5173/minimal-join.html -->
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <script type="module" src="./PandaJS - Incremental Join Benchmark_files/client"></script>
+
+  
+  <title>PandaJS - Incremental Join Benchmark</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { 
+      font-family: 'SF Mono', Monaco, 'Consolas', monospace; 
+      background: #0d1117; 
+      color: #c9d1d9; 
+      padding: 40px; 
+      max-width: 1100px;
+      margin: 0 auto;
+      line-height: 1.5;
+    }
+    h1 { 
+      color: #58a6ff; 
+      font-weight: 400;
+      font-size: 28px;
+      margin-bottom: 8px;
+      letter-spacing: -0.5px;
+    }
+    .subtitle {
+      color: #8b949e;
+      font-size: 14px;
+      margin-bottom: 30px;
+    }
+    .status { 
+      background: #161b22; 
+      padding: 14px 18px; 
+      border-radius: 6px; 
+      margin: 15px 0; 
+      border-left: 3px solid #58a6ff;
+      font-size: 13px;
+    }
+    .status.success { border-left-color: #3fb950; }
+    .status.error { border-left-color: #f85149; }
+    
+    .section {
+      background: #161b22;
+      border: 1px solid #30363d;
+      border-radius: 6px;
+      margin: 20px 0;
+      overflow: hidden;
+    }
+    .section-header {
+      background: #21262d;
+      padding: 12px 16px;
+      border-bottom: 1px solid #30363d;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .section-title {
+      color: #c9d1d9;
+      font-weight: 600;
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .section-badge {
+      background: #238636;
+      color: #fff;
+      padding: 3px 10px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: 500;
+    }
+    .section-badge.dim { background: #1f6feb; }
+    .section-body { padding: 16px; }
+    
+    .preview-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12px;
+      margin-top: 10px;
+    }
+    .preview-table th {
+      text-align: left;
+      padding: 8px 12px;
+      background: #21262d;
+      color: #8b949e;
+      font-weight: 500;
+      border-bottom: 1px solid #30363d;
+    }
+    .preview-table td {
+      padding: 8px 12px;
+      border-bottom: 1px solid #21262d;
+      color: #c9d1d9;
+    }
+    .preview-table tr:last-child td { border-bottom: none; }
+    .preview-table .ellipsis { color: #484f58; text-align: center; }
+    
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+    }
+    .stat-card {
+      background: #21262d;
+      padding: 14px 16px;
+      border-radius: 6px;
+    }
+    .stat-label { 
+      color: #8b949e; 
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 4px;
+    }
+    .stat-value { 
+      color: #3fb950; 
+      font-size: 18px;
+      font-weight: 600;
+      font-variant-numeric: tabular-nums;
+    }
+    .stat-value.highlight { color: #58a6ff; }
+    
+    .results-table { 
+      width: 100%; 
+      border-collapse: collapse; 
+      font-size: 13px;
+    }
+    .results-table th { 
+      padding: 10px 12px; 
+      text-align: right; 
+      background: #21262d;
+      color: #8b949e;
+      font-weight: 500;
+      border-bottom: 1px solid #30363d;
+    }
+    .results-table th:first-child { text-align: left; }
+    .results-table td { 
+      padding: 10px 12px; 
+      text-align: right; 
+      border-bottom: 1px solid #21262d;
+    }
+    .results-table td:first-child { 
+      text-align: left; 
+      color: #58a6ff; 
+      font-weight: 600; 
+    }
+    .results-table tr:hover { background: #1c2128; }
+    
+    .replay-container {
+      background: #161b22;
+      border: 1px solid #30363d;
+      border-radius: 6px;
+      padding: 20px;
+      margin: 20px 0;
+    }
+    .replay-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 15px;
+    }
+    .replay-title {
+      color: #c9d1d9;
+      font-size: 14px;
+      font-weight: 600;
+    }
+    .replay-status {
+      color: #8b949e;
+      font-size: 12px;
+    }
+    .timeline {
+      width: 100%;
+      height: 6px;
+      -webkit-appearance: none;
+      appearance: none;
+      background: #21262d;
+      border-radius: 3px;
+      cursor: pointer;
+      outline: none;
+    }
+    .timeline::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 16px;
+      height: 16px;
+      background: #58a6ff;
+      border-radius: 50%;
+      cursor: grab;
+    }
+    .timeline-markers {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 6px;
+      font-size: 11px;
+      color: #484f58;
+    }
+    .controls {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-top: 15px;
+    }
+    .control-btn {
+      background: #21262d;
+      border: 1px solid #30363d;
+      color: #c9d1d9;
+      padding: 8px 16px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 13px;
+      font-family: inherit;
+      transition: all 0.15s;
+    }
+    .control-btn:hover {
+      background: #30363d;
+      border-color: #8b949e;
+    }
+    .control-btn.primary {
+      background: #238636;
+      border-color: #238636;
+      color: #fff;
+    }
+    .control-btn.primary:hover {
+      background: #2ea043;
+    }
+    .control-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    .speed-control {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-left: auto;
+    }
+    .speed-label {
+      color: #8b949e;
+      font-size: 12px;
+    }
+    .speed-select {
+      background: #21262d;
+      border: 1px solid #30363d;
+      color: #c9d1d9;
+      padding: 6px 10px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-family: inherit;
+    }
+    .time-display {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 15px;
+      padding-top: 15px;
+      border-top: 1px solid #30363d;
+    }
+    .current-time {
+      font-size: 22px;
+      font-weight: 400;
+      color: #58a6ff;
+      font-variant-numeric: tabular-nums;
+    }
+    .delta-info { text-align: right; }
+    .delta-count {
+      color: #3fb950;
+      font-size: 16px;
+      font-weight: 600;
+    }
+    .delta-label {
+      color: #484f58;
+      font-size: 11px;
+    }
+    
+    pre { 
+      background: #0d1117; 
+      border: 1px solid #30363d;
+      border-radius: 6px;
+      padding: 16px; 
+      overflow-x: auto;
+      font-size: 11px;
+      line-height: 1.5;
+      color: #8b949e;
+      max-height: 300px;
+      overflow-y: auto;
+    }
+  </style>
+<script>
+if (!window._originalPrompt) {
+  window._originalPrompt = window.prompt;
+  window._originalConfirm = window.confirm;
+  window._originalAlert = window.alert;
+}
+
+function manipulateDialog(methodName, oldDialog) {
+  // override the default dialog and add our logic
+  window[methodName] = function (message = '', defaultValue = '') {
+    console.log('sending a message');
+
+    var answer = oldDialog(message, defaultValue);
+    if (methodName === 'confirm') answer = answer.toString();
+
+    // if the user didn't cancel it
+    if (answer || /(alert|confirm)/.test(methodName)) {
+      window.postMessage(
+        {
+          type: 'extension:injected-script',
+          payload: {
+            type: methodName,
+            value: answer,
+          },
+        },
+        '*'
+      );
+    }
+    return answer;
+  };
+}
+
+manipulateDialog('prompt', window._originalPrompt);
+manipulateDialog('confirm', window._originalConfirm);
+manipulateDialog('alert', window._originalAlert);
+</script></head>
+<body>
+  <h1>PandaJS Incremental Join Benchmark</h1>
+  <p class="subtitle">Many:1 join benchmark - 100K trades joined with 100 quotes (dimension table lookup)</p>
+  
+  <div class="status success" id="status">Benchmark complete</div>
+  
+  <!-- TRADES DATASET -->
+  <div class="section" id="trades-section">
+    <div class="section-header">
+      <span class="section-title">Trades (Fact Table, Streaming)</span>
+      <span class="section-badge" id="trades-count">150,000 rows</span>
+    </div>
+    <div class="section-body">
+      <table class="preview-table" id="trades-preview">
+        <thead id="trades-preview-head"><tr><th>tradeId</th><th>symbol</th><th>quantity</th><th>tradePrice</th></tr></thead>
+        <tbody id="trades-preview-body"><tr><td>0</td><td>AA00</td><td>100</td><td>4,950</td></tr><tr><td>1</td><td>AB01</td><td>200</td><td>5,407</td></tr><tr><td>2</td><td>AC02</td><td>300</td><td>5,864</td></tr><tr><td>3</td><td>AD03</td><td>400</td><td>6,321</td></tr><tr><td>4</td><td>AE04</td><td>500</td><td>6,778</td></tr><tr><td colspan="4" class="ellipsis">... 99,995 more rows ...</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+  
+  <!-- QUOTES DATASET -->
+  <div class="section" id="quotes-section">
+    <div class="section-header">
+      <span class="section-title">Quotes (Dimension Table, Static)</span>
+      <span class="section-badge dim" id="quotes-count">100 rows</span>
+    </div>
+    <div class="section-body">
+      <table class="preview-table" id="quotes-preview">
+        <thead id="quotes-preview-head"><tr><th>symbol</th><th>bidPrice</th><th>askPrice</th><th>spread</th></tr></thead>
+        <tbody id="quotes-preview-body"><tr><td>AA00</td><td>5,000</td><td>5,010</td><td>10</td></tr><tr><td>AB01</td><td>5,450</td><td>5,465</td><td>15</td></tr><tr><td>AC02</td><td>5,900</td><td>5,920</td><td>20</td></tr><tr><td>AD03</td><td>6,350</td><td>6,375</td><td>25</td></tr><tr><td>AE04</td><td>6,800</td><td>6,830</td><td>30</td></tr><tr><td colspan="4" class="ellipsis">... 95 more rows ...</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+  
+  <!-- CODE SNIPPETS -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-title">DataFrame Operations</span>
+    </div>
+    <div class="section-body" style="padding: 0;">
+      <div style="padding: 16px; border-bottom: 1px solid #30363d;">
+        <div style="color: #8b949e; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px;">1. Load Data from Arrow IPC</div>
+        <pre style="margin: 0; background: #0d1117; border: none; padding: 12px; font-size: 12px;"><code style="color: #c9d1d9;"><span style="color: #ff7b72;">const</span> tradesSource = Source.<span style="color: #d2a8ff;">fromArrowIPC</span>(bytes);
+<span style="color: #ff7b72;">const</span> quotesSource = Source.<span style="color: #d2a8ff;">fromArrowIPC</span>(bytes);
+
+<span style="color: #8b949e;">// Convert Sources to DataFrames</span>
+<span style="color: #ff7b72;">const</span> tradesDF = tradesSource.<span style="color: #d2a8ff;">toDataFrame</span>();
+<span style="color: #ff7b72;">const</span> quotesDF = quotesSource.<span style="color: #d2a8ff;">toDataFrame</span>();</code></pre>
+      </div>
+      <div style="padding: 16px; border-bottom: 1px solid #30363d;">
+        <div style="color: #8b949e; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px;">2. Join + Aggregate Pipeline</div>
+        <pre style="margin: 0; background: #0d1117; border: none; padding: 12px; font-size: 12px;"><code style="color: #c9d1d9;"><span style="color: #8b949e;">// Many:1 join - each trade matches exactly 1 quote</span>
+<span style="color: #ff7b72;">const</span> joined = tradesDF.<span style="color: #d2a8ff;">join</span>(quotesDF, { 
+  <span style="color: #79c0ff;">on</span>: <span style="color: #a5d6ff;">'symbol'</span>, 
+  <span style="color: #79c0ff;">how</span>: <span style="color: #a5d6ff;">'inner'</span>,
+  <span style="color: #79c0ff;">suffixes</span>: [<span style="color: #a5d6ff;">''</span>, <span style="color: #a5d6ff;">'_q'</span>]
+});
+
+<span style="color: #8b949e;">// Build aggregation pipeline</span>
+<span style="color: #ff7b72;">const</span> aggregatedDF = joined
+  .<span style="color: #d2a8ff;">withColumn</span>(<span style="color: #a5d6ff;">'tradeValue'</span>, <span style="color: #d2a8ff;">col</span>(<span style="color: #a5d6ff;">'quantity'</span>).<span style="color: #d2a8ff;">mul</span>(<span style="color: #d2a8ff;">col</span>(<span style="color: #a5d6ff;">'askPrice'</span>)))
+  .<span style="color: #d2a8ff;">groupBy</span>(<span style="color: #a5d6ff;">'symbol'</span>)
+  .<span style="color: #d2a8ff;">agg</span>({
+    <span style="color: #79c0ff;">tradeCount</span>: <span style="color: #d2a8ff;">col</span>(<span style="color: #a5d6ff;">'tradeId'</span>).<span style="color: #d2a8ff;">count</span>(),
+    <span style="color: #79c0ff;">totalQty</span>: <span style="color: #d2a8ff;">col</span>(<span style="color: #a5d6ff;">'quantity'</span>).<span style="color: #d2a8ff;">sum</span>(),
+    <span style="color: #79c0ff;">avgSpread</span>: <span style="color: #d2a8ff;">col</span>(<span style="color: #a5d6ff;">'spread'</span>).<span style="color: #d2a8ff;">mean</span>(),
+  });</code></pre>
+      </div>
+      <div style="padding: 16px;">
+        <div style="color: #8b949e; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px;">3. Incremental Updates (O(1) insert)</div>
+        <pre style="margin: 0; background: #0d1117; border: none; padding: 12px; font-size: 12px;"><code style="color: #c9d1d9;"><span style="color: #8b949e;">// Insert new trades - Source tracks deltas</span>
+tradesSource.<span style="color: #d2a8ff;">insertFromArrowIPC</span>(deltaBytes);
+
+<span style="color: #8b949e;">// Re-execute aggregation - auto-syncs with Source</span>
+<span style="color: #ff7b72;">const</span> results = aggregatedDF.<span style="color: #d2a8ff;">toArray</span>();</code></pre>
+      </div>
+    </div>
+  </div>
+  
+  <!-- PERFORMANCE STATS -->
+  <div class="section" id="perf-section" style="display: block;">
+    <div class="section-header">
+      <span class="section-title">Benchmark Results</span>
+    </div>
+    <div class="section-body">
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-label">Initial Join Time</div>
+          <div class="stat-value" id="join-time">87ms</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Join Throughput</div>
+          <div class="stat-value highlight" id="throughput">1,147,936 rows/sec</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Incremental Delta (avg)</div>
+          <div class="stat-value" id="trade-delta-avg">1.0ms</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Delta Throughput</div>
+          <div class="stat-value highlight" id="delta-throughput">986,842 rows/sec</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- TIME REPLAY CONTROLS -->
+  <div class="replay-container" id="replay-controls" style="display: block;">
+    <div class="replay-header">
+      <span class="replay-title">Time Replay</span>
+      <span class="replay-status" id="replay-status">Paused - click Play or drag timeline</span>
+    </div>
+    
+    <div class="timeline-container">
+      <input type="range" class="timeline" id="timeline" min="0" max="100" value="100">
+      <div class="timeline-markers">
+        <span>Start</span>
+        <span id="timeline-end">0:05.329</span>
+      </div>
+    </div>
+    
+    <div class="controls">
+      <button class="control-btn" id="btn-reset" title="Reset to start">Reset</button>
+      <button class="control-btn primary" id="btn-play" title="Play/Pause">Play</button>
+      <button class="control-btn" id="btn-step" title="Step forward one delta">Step</button>
+      
+      <div class="speed-control">
+        <span class="speed-label">Speed:</span>
+        <select class="speed-select" id="speed-select">
+          <option value="0.25">0.25x</option>
+          <option value="0.5">0.5x</option>
+          <option value="1" selected="">1x</option>
+          <option value="2">2x</option>
+          <option value="4">4x</option>
+          <option value="10">10x</option>
+          <option value="0">Instant</option>
+        </select>
+      </div>
+    </div>
+    
+    <div class="time-display">
+      <div class="current-time" id="current-time">0:00.000</div>
+      <div class="delta-info">
+        <div class="delta-count"><span id="current-delta">0</span> / <span id="total-deltas">49</span></div>
+        <div class="delta-label">deltas applied</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- AGGREGATED RESULTS -->
+  <div class="section" id="join-result" style="display: block;">
+    <div class="section-header">
+      <span class="section-title">Aggregated Join Results by Symbol</span>
+    </div>
+    <div class="section-body" style="padding: 0;">
+      <table class="results-table" id="result-table">
+        <thead>
+          <tr>
+            <th>Symbol</th>
+            <th>Trade Count</th>
+            <th>Total Qty</th>
+            <th>Avg Spread</th>
+          </tr>
+        </thead>
+        <tbody id="result-body"><tr>
+          <td>AA00</td>
+          <td>1,490</td>
+          <td>149,000</td>
+          <td>$0.10</td>
+        </tr><tr>
+          <td>AB01</td>
+          <td>1,490</td>
+          <td>298,000</td>
+          <td>$0.15</td>
+        </tr><tr>
+          <td>AC02</td>
+          <td>1,490</td>
+          <td>447,000</td>
+          <td>$0.20</td>
+        </tr><tr>
+          <td>AD03</td>
+          <td>1,490</td>
+          <td>596,000</td>
+          <td>$0.25</td>
+        </tr><tr>
+          <td>AE04</td>
+          <td>1,490</td>
+          <td>745,000</td>
+          <td>$0.30</td>
+        </tr><tr>
+          <td>AF05</td>
+          <td>1,490</td>
+          <td>894,000</td>
+          <td>$0.10</td>
+        </tr><tr>
+          <td>AG06</td>
+          <td>1,490</td>
+          <td>1,043,000</td>
+          <td>$0.15</td>
+        </tr><tr>
+          <td>AH07</td>
+          <td>1,490</td>
+          <td>1,192,000</td>
+          <td>$0.20</td>
+        </tr><tr>
+          <td>AI08</td>
+          <td>1,490</td>
+          <td>1,341,000</td>
+          <td>$0.25</td>
+        </tr><tr>
+          <td>AJ09</td>
+          <td>1,490</td>
+          <td>1,490,000</td>
+          <td>$0.30</td>
+        </tr><tr>
+          <td>AK10</td>
+          <td>1,490</td>
+          <td>149,000</td>
+          <td>$0.10</td>
+        </tr><tr>
+          <td>AL11</td>
+          <td>1,490</td>
+          <td>298,000</td>
+          <td>$0.15</td>
+        </tr><tr>
+          <td>AM12</td>
+          <td>1,490</td>
+          <td>447,000</td>
+          <td>$0.20</td>
+        </tr><tr>
+          <td>AN13</td>
+          <td>1,490</td>
+          <td>596,000</td>
+          <td>$0.25</td>
+        </tr><tr>
+          <td>AO14</td>
+          <td>1,490</td>
+          <td>745,000</td>
+          <td>$0.30</td>
+        </tr><tr>
+          <td>AP15</td>
+          <td>1,490</td>
+          <td>894,000</td>
+          <td>$0.10</td>
+        </tr><tr>
+          <td>AQ16</td>
+          <td>1,490</td>
+          <td>1,043,000</td>
+          <td>$0.15</td>
+        </tr><tr>
+          <td>AR17</td>
+          <td>1,490</td>
+          <td>1,192,000</td>
+          <td>$0.20</td>
+        </tr><tr>
+          <td>AS18</td>
+          <td>1,490</td>
+          <td>1,341,000</td>
+          <td>$0.25</td>
+        </tr><tr>
+          <td>AT19</td>
+          <td>1,490</td>
+          <td>1,490,000</td>
+          <td>$0.30</td>
+        </tr><tr>
+          <td>AU20</td>
+          <td>1,490</td>
+          <td>149,000</td>
+          <td>$0.10</td>
+        </tr><tr>
+          <td>AV21</td>
+          <td>1,490</td>
+          <td>298,000</td>
+          <td>$0.15</td>
+        </tr><tr>
+          <td>AW22</td>
+          <td>1,490</td>
+          <td>447,000</td>
+          <td>$0.20</td>
+        </tr><tr>
+          <td>AX23</td>
+          <td>1,490</td>
+          <td>596,000</td>
+          <td>$0.25</td>
+        </tr><tr>
+          <td>AY24</td>
+          <td>1,490</td>
+          <td>745,000</td>
+          <td>$0.30</td>
+        </tr><tr>
+          <td>AZ25</td>
+          <td>1,490</td>
+          <td>894,000</td>
+          <td>$0.10</td>
+        </tr><tr>
+          <td>BA26</td>
+          <td>1,490</td>
+          <td>1,043,000</td>
+          <td>$0.15</td>
+        </tr><tr>
+          <td>BB27</td>
+          <td>1,490</td>
+          <td>1,192,000</td>
+          <td>$0.20</td>
+        </tr><tr>
+          <td>BC28</td>
+          <td>1,490</td>
+          <td>1,341,000</td>
+          <td>$0.25</td>
+        </tr><tr>
+          <td>BD29</td>
+          <td>1,490</td>
+          <td>1,490,000</td>
+          <td>$0.30</td>
+        </tr><tr>
+          <td>BE30</td>
+          <td>1,490</td>
+          <td>149,000</td>
+          <td>$0.10</td>
+        </tr><tr>
+          <td>BF31</td>
+          <td>1,490</td>
+          <td>298,000</td>
+          <td>$0.15</td>
+        </tr><tr>
+          <td>BG32</td>
+          <td>1,490</td>
+          <td>447,000</td>
+          <td>$0.20</td>
+        </tr><tr>
+          <td>BH33</td>
+          <td>1,490</td>
+          <td>596,000</td>
+          <td>$0.25</td>
+        </tr><tr>
+          <td>BI34</td>
+          <td>1,490</td>
+          <td>745,000</td>
+          <td>$0.30</td>
+        </tr><tr>
+          <td>BJ35</td>
+          <td>1,490</td>
+          <td>894,000</td>
+          <td>$0.10</td>
+        </tr><tr>
+          <td>BK36</td>
+          <td>1,490</td>
+          <td>1,043,000</td>
+          <td>$0.15</td>
+        </tr><tr>
+          <td>BL37</td>
+          <td>1,490</td>
+          <td>1,192,000</td>
+          <td>$0.20</td>
+        </tr><tr>
+          <td>BM38</td>
+          <td>1,490</td>
+          <td>1,341,000</td>
+          <td>$0.25</td>
+        </tr><tr>
+          <td>BN39</td>
+          <td>1,490</td>
+          <td>1,490,000</td>
+          <td>$0.30</td>
+        </tr><tr>
+          <td>BO40</td>
+          <td>1,490</td>
+          <td>149,000</td>
+          <td>$0.10</td>
+        </tr><tr>
+          <td>BP41</td>
+          <td>1,490</td>
+          <td>298,000</td>
+          <td>$0.15</td>
+        </tr><tr>
+          <td>BQ42</td>
+          <td>1,490</td>
+          <td>447,000</td>
+          <td>$0.20</td>
+        </tr><tr>
+          <td>BR43</td>
+          <td>1,490</td>
+          <td>596,000</td>
+          <td>$0.25</td>
+        </tr><tr>
+          <td>BS44</td>
+          <td>1,490</td>
+          <td>745,000</td>
+          <td>$0.30</td>
+        </tr><tr>
+          <td>BT45</td>
+          <td>1,490</td>
+          <td>894,000</td>
+          <td>$0.10</td>
+        </tr><tr>
+          <td>BU46</td>
+          <td>1,490</td>
+          <td>1,043,000</td>
+          <td>$0.15</td>
+        </tr><tr>
+          <td>BV47</td>
+          <td>1,490</td>
+          <td>1,192,000</td>
+          <td>$0.20</td>
+        </tr><tr>
+          <td>BW48</td>
+          <td>1,490</td>
+          <td>1,341,000</td>
+          <td>$0.25</td>
+        </tr><tr>
+          <td>BX49</td>
+          <td>1,490</td>
+          <td>1,490,000</td>
+          <td>$0.30</td>
+        </tr><tr>
+          <td>BY50</td>
+          <td>1,490</td>
+          <td>149,000</td>
+          <td>$0.10</td>
+        </tr><tr>
+          <td>BZ51</td>
+          <td>1,490</td>
+          <td>298,000</td>
+          <td>$0.15</td>
+        </tr><tr>
+          <td>CA52</td>
+          <td>1,490</td>
+          <td>447,000</td>
+          <td>$0.20</td>
+        </tr><tr>
+          <td>CB53</td>
+          <td>1,490</td>
+          <td>596,000</td>
+          <td>$0.25</td>
+        </tr><tr>
+          <td>CC54</td>
+          <td>1,490</td>
+          <td>745,000</td>
+          <td>$0.30</td>
+        </tr><tr>
+          <td>CD55</td>
+          <td>1,490</td>
+          <td>894,000</td>
+          <td>$0.10</td>
+        </tr><tr>
+          <td>CE56</td>
+          <td>1,490</td>
+          <td>1,043,000</td>
+          <td>$0.15</td>
+        </tr><tr>
+          <td>CF57</td>
+          <td>1,490</td>
+          <td>1,192,000</td>
+          <td>$0.20</td>
+        </tr><tr>
+          <td>CG58</td>
+          <td>1,490</td>
+          <td>1,341,000</td>
+          <td>$0.25</td>
+        </tr><tr>
+          <td>CH59</td>
+          <td>1,490</td>
+          <td>1,490,000</td>
+          <td>$0.30</td>
+        </tr><tr>
+          <td>CI60</td>
+          <td>1,490</td>
+          <td>149,000</td>
+          <td>$0.10</td>
+        </tr><tr>
+          <td>CJ61</td>
+          <td>1,490</td>
+          <td>298,000</td>
+          <td>$0.15</td>
+        </tr><tr>
+          <td>CK62</td>
+          <td>1,490</td>
+          <td>447,000</td>
+          <td>$0.20</td>
+        </tr><tr>
+          <td>CL63</td>
+          <td>1,490</td>
+          <td>596,000</td>
+          <td>$0.25</td>
+        </tr><tr>
+          <td>CM64</td>
+          <td>1,490</td>
+          <td>745,000</td>
+          <td>$0.30</td>
+        </tr><tr>
+          <td>CN65</td>
+          <td>1,490</td>
+          <td>894,000</td>
+          <td>$0.10</td>
+        </tr><tr>
+          <td>CO66</td>
+          <td>1,490</td>
+          <td>1,043,000</td>
+          <td>$0.15</td>
+        </tr><tr>
+          <td>CP67</td>
+          <td>1,490</td>
+          <td>1,192,000</td>
+          <td>$0.20</td>
+        </tr><tr>
+          <td>CQ68</td>
+          <td>1,490</td>
+          <td>1,341,000</td>
+          <td>$0.25</td>
+        </tr><tr>
+          <td>CR69</td>
+          <td>1,490</td>
+          <td>1,490,000</td>
+          <td>$0.30</td>
+        </tr><tr>
+          <td>CS70</td>
+          <td>1,490</td>
+          <td>149,000</td>
+          <td>$0.10</td>
+        </tr><tr>
+          <td>CT71</td>
+          <td>1,490</td>
+          <td>298,000</td>
+          <td>$0.15</td>
+        </tr><tr>
+          <td>CU72</td>
+          <td>1,490</td>
+          <td>447,000</td>
+          <td>$0.20</td>
+        </tr><tr>
+          <td>CV73</td>
+          <td>1,490</td>
+          <td>596,000</td>
+          <td>$0.25</td>
+        </tr><tr>
+          <td>CW74</td>
+          <td>1,490</td>
+          <td>745,000</td>
+          <td>$0.30</td>
+        </tr><tr>
+          <td>CX75</td>
+          <td>1,490</td>
+          <td>894,000</td>
+          <td>$0.10</td>
+        </tr><tr>
+          <td>CY76</td>
+          <td>1,490</td>
+          <td>1,043,000</td>
+          <td>$0.15</td>
+        </tr><tr>
+          <td>CZ77</td>
+          <td>1,490</td>
+          <td>1,192,000</td>
+          <td>$0.20</td>
+        </tr><tr>
+          <td>DA78</td>
+          <td>1,490</td>
+          <td>1,341,000</td>
+          <td>$0.25</td>
+        </tr><tr>
+          <td>DB79</td>
+          <td>1,490</td>
+          <td>1,490,000</td>
+          <td>$0.30</td>
+        </tr><tr>
+          <td>DC80</td>
+          <td>1,490</td>
+          <td>149,000</td>
+          <td>$0.10</td>
+        </tr><tr>
+          <td>DD81</td>
+          <td>1,490</td>
+          <td>298,000</td>
+          <td>$0.15</td>
+        </tr><tr>
+          <td>DE82</td>
+          <td>1,490</td>
+          <td>447,000</td>
+          <td>$0.20</td>
+        </tr><tr>
+          <td>DF83</td>
+          <td>1,490</td>
+          <td>596,000</td>
+          <td>$0.25</td>
+        </tr><tr>
+          <td>DG84</td>
+          <td>1,490</td>
+          <td>745,000</td>
+          <td>$0.30</td>
+        </tr><tr>
+          <td>DH85</td>
+          <td>1,490</td>
+          <td>894,000</td>
+          <td>$0.10</td>
+        </tr><tr>
+          <td>DI86</td>
+          <td>1,490</td>
+          <td>1,043,000</td>
+          <td>$0.15</td>
+        </tr><tr>
+          <td>DJ87</td>
+          <td>1,490</td>
+          <td>1,192,000</td>
+          <td>$0.20</td>
+        </tr><tr>
+          <td>DK88</td>
+          <td>1,490</td>
+          <td>1,341,000</td>
+          <td>$0.25</td>
+        </tr><tr>
+          <td>DL89</td>
+          <td>1,490</td>
+          <td>1,490,000</td>
+          <td>$0.30</td>
+        </tr><tr>
+          <td>DM90</td>
+          <td>1,490</td>
+          <td>149,000</td>
+          <td>$0.10</td>
+        </tr><tr>
+          <td>DN91</td>
+          <td>1,490</td>
+          <td>298,000</td>
+          <td>$0.15</td>
+        </tr><tr>
+          <td>DO92</td>
+          <td>1,490</td>
+          <td>447,000</td>
+          <td>$0.20</td>
+        </tr><tr>
+          <td>DP93</td>
+          <td>1,490</td>
+          <td>596,000</td>
+          <td>$0.25</td>
+        </tr><tr>
+          <td>DQ94</td>
+          <td>1,490</td>
+          <td>745,000</td>
+          <td>$0.30</td>
+        </tr><tr>
+          <td>DR95</td>
+          <td>1,490</td>
+          <td>894,000</td>
+          <td>$0.10</td>
+        </tr><tr>
+          <td>DS96</td>
+          <td>1,490</td>
+          <td>1,043,000</td>
+          <td>$0.15</td>
+        </tr><tr>
+          <td>DT97</td>
+          <td>1,490</td>
+          <td>1,192,000</td>
+          <td>$0.20</td>
+        </tr><tr>
+          <td>DU98</td>
+          <td>1,490</td>
+          <td>1,341,000</td>
+          <td>$0.25</td>
+        </tr><tr>
+          <td>DV99</td>
+          <td>1,490</td>
+          <td>1,490,000</td>
+          <td>$0.30</td>
+        </tr></tbody>
+      </table>
+    </div>
+  </div>
+  
+  <pre id="log">Connected to server
+
+Receiving trades snapshot (100,000 rows)...
+  trades snapshot received
+
+Receiving quotes snapshot (100 rows)...
+  quotes snapshot received
+  Trades binary: 100,000 rows loaded
+  Quotes binary: 100 rows loaded
+Both Sources ready (after quotes load), processing initial join...
+Sources ready from Arrow IPC...
+  Source creation: 0.1ms
+  Trades: 100000 rows x 4 cols
+  Quotes: 100 rows x 4 cols
+
+Building DataFrame pipeline from Sources...
+  Trades columns: tradeId, symbol, quantity, tradePrice
+  Quotes columns: symbol, bidPrice, askPrice, spread
+  Join result: 100,000 rows (many:1, equals trade count)
+  Pipeline executed: 87.2ms
+  Result: 100 groups
+  Source/DataFrame API working correctly
+
+==================================================
+INITIAL JOIN COMPLETE
+==================================================
+  DataFrame API:  87.2ms (100 groups)
+  Full pipeline:  87.9ms
+
+Aggregated: 100 symbols, 100,000 joined rows
+
+Ready for incremental updates
+
+Streaming 50 trade deltas (1000 rows each)...
+  Trade delta: 1.1ms (+1,000 rows)
+    [BREAKDOWN] Insert=0.2ms | Agg=0.9ms
+  Trade delta: 0.9ms (+1,000 rows)
+    [BREAKDOWN] Insert=0.1ms | Agg=0.8ms
+  Trade delta: 1.1ms (+1,000 rows)
+    [BREAKDOWN] Insert=0.1ms | Agg=0.9ms
+  Trade delta: 0.8ms (+1,000 rows)
+    [BREAKDOWN] Insert=0.1ms | Agg=0.7ms
+  Trade delta: 0.8ms (+1,000 rows)
+  Trade delta: 0.9ms (+1,000 rows)
+    [BREAKDOWN] Insert=0.2ms | Agg=0.7ms
+  Trade delta: 0.9ms (+1,000 rows)
+    [BREAKDOWN] Insert=0.1ms | Agg=0.9ms
+  Trade delta: 1.0ms (+1,000 rows)
+    [BREAKDOWN] Insert=0.1ms | Agg=0.9ms
+  Trade delta: 1.0ms (+1,000 rows)
+    [BREAKDOWN] Insert=0.1ms | Agg=0.8ms
+  Trade delta: 0.9ms (+1,000 rows)
+  Trade delta: 1.1ms (+1,000 rows)
+    [BREAKDOWN] Insert=0.2ms | Agg=0.9ms
+  Trade delta: 1.0ms (+1,000 rows)
+
+=======================================================
+  BENCHMARK COMPLETE
+=======================================================
+
+  Delta latency: avg=1.0ms (45 measured)
+  Delta throughput: 986,842 rows/sec
+
+  Final state:
+    Trades: 149,000 (fact table)
+    Quotes: 100 (dimension table)
+    Joined rows: 149,000 (many:1)
+
+  Memory (trades Source):
+    Pending deltas: 49
+    Base batch rows: 100,000
+    Est total rows: 149,000
+=======================================================
+
+Aggregated: 100 symbols, 149,000 joined rows
+    [BREAKDOWN] Insert=0.1ms | Agg=0.8ms
+</pre>
+
+  <script type="module" src="./PandaJS - Incremental Join Benchmark_files/minimal-join.html"></script>
+
+
+</body></html>
